@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, User, Phone, MapPin } from 'lucide-react';
 import { Patient } from '../types';
-import { storage } from '../utils/storage';
+import { patientsAPI } from '../utils/api';
 
 interface PatientManagementProps {
   tenantId: string;
@@ -18,10 +18,14 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
     loadPatients();
   }, [tenantId]);
 
-  const loadPatients = () => {
-    const allPatients = storage.getPatients();
-    const tenantPatients = allPatients.filter((p) => p.tenantId === tenantId);
-    setPatients(tenantPatients);
+  const loadPatients = async () => {
+    try {
+      const allPatients = await patientsAPI.getAll();
+      const tenantPatients = allPatients.filter((p) => p.tenantId === tenantId);
+      setPatients(tenantPatients);
+    } catch (error) {
+      console.error('Failed to load patients:', error);
+    }
   };
 
   const filteredPatients = patients.filter((patient) => {
@@ -32,18 +36,18 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const handleAddPatient = (newPatient: Omit<Patient, 'id' | 'tenantId' | 'admissionDate'>) => {
-    const patient: Patient = {
-      ...newPatient,
-      id: `patient-${Date.now()}`,
-      tenantId,
-      admissionDate: new Date().toISOString(),
-    };
-
-    const allPatients = storage.getPatients();
-    storage.setPatients([...allPatients, patient]);
-    loadPatients();
-    setShowAddModal(false);
+  const handleAddPatient = async (newPatient: Omit<Patient, 'id' | 'tenantId' | 'admissionDate'>) => {
+    try {
+      await patientsAPI.create({
+        ...newPatient,
+        admissionDate: new Date().toISOString(),
+      });
+      await loadPatients();
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Failed to add patient:', error);
+      alert('Failed to add patient. Please try again.');
+    }
   };
 
   return (

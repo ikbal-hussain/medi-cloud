@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, FileText, Calendar, User } from 'lucide-react';
 import { Prescription, Patient, UserRole } from '../types';
-import { storage } from '../utils/storage';
+import { prescriptionsAPI, patientsAPI, usersAPI } from '../utils/api';
 
 interface PrescriptionManagementProps {
   tenantId: string;
@@ -18,29 +18,29 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
     loadData();
   }, [tenantId]);
 
-  const loadData = () => {
-    const allPrescriptions = storage.getPrescriptions();
-    const tenantPrescriptions = allPrescriptions.filter((p) => p.tenantId === tenantId);
-    setPrescriptions(tenantPrescriptions);
+  const loadData = async () => {
+    try {
+      const allPrescriptions = await prescriptionsAPI.getAll();
+      const tenantPrescriptions = allPrescriptions.filter((p) => p.tenantId === tenantId);
+      setPrescriptions(tenantPrescriptions);
 
-    const allPatients = storage.getPatients();
-    const tenantPatients = allPatients.filter((p) => p.tenantId === tenantId);
-    setPatients(tenantPatients);
+      const allPatients = await patientsAPI.getAll();
+      const tenantPatients = allPatients.filter((p) => p.tenantId === tenantId);
+      setPatients(tenantPatients);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    }
   };
 
-  const handleAddPrescription = (newPrescription: Omit<Prescription, 'id' | 'tenantId' | 'createdAt' | 'doctorId'>) => {
-    const prescription: Prescription = {
-      ...newPrescription,
-      id: `prescription-${Date.now()}`,
-      tenantId,
-      doctorId: userId,
-      createdAt: new Date().toISOString(),
-    };
-
-    const allPrescriptions = storage.getPrescriptions();
-    storage.setPrescriptions([...allPrescriptions, prescription]);
-    loadData();
-    setShowAddModal(false);
+  const handleAddPrescription = async (newPrescription: Omit<Prescription, 'id' | 'tenantId' | 'createdAt' | 'doctorId'>) => {
+    try {
+      await prescriptionsAPI.create(newPrescription);
+      await loadData();
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Failed to add prescription:', error);
+      alert('Failed to add prescription. Please try again.');
+    }
   };
 
   const getPatientName = (patientId: string) => {
@@ -48,9 +48,25 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
     return patient?.name || 'Unknown Patient';
   };
 
+  const [doctors, setDoctors] = useState<Array<{ id: string; name: string }>>([]);
+
+  useEffect(() => {
+    const loadDoctors = async () => {
+      try {
+        const allUsers = await usersAPI.getAll();
+        const doctorsList = allUsers
+          .filter((u) => u.role === 'DOCTOR' && u.tenantId === tenantId)
+          .map((u) => ({ id: u.id, name: u.name }));
+        setDoctors(doctorsList);
+      } catch (error) {
+        console.error('Failed to load doctors:', error);
+      }
+    };
+    loadDoctors();
+  }, [tenantId]);
+
   const getDoctorName = (doctorId: string) => {
-    const users = storage.getUsers();
-    const doctor = users.find((u) => u.id === doctorId);
+    const doctor = doctors.find((d) => d.id === doctorId);
     return doctor?.name || 'Unknown Doctor';
   };
 

@@ -1,74 +1,71 @@
 import { User, Tenant } from '../types';
-import { storage } from './storage';
+import { authAPI } from './api';
 
-export const login = (email: string, password: string): { user: User; tenant: Tenant } | null => {
-  const users = storage.getUsers();
-  const user = users.find((u) => u.email === email && u.password === password);
-
-  if (!user) {
+export const login = async (email: string, password: string): Promise<{ user: User; tenant: Tenant } | null> => {
+  try {
+    const data = await authAPI.login(email, password);
+    return {
+      user: {
+        id: data.user.id,
+        tenantId: data.user.tenantId,
+        email: data.user.email,
+        password: '', // Don't store password
+        name: data.user.name,
+        role: data.user.role as User['role'],
+        createdAt: new Date().toISOString(),
+      },
+      tenant: {
+        id: data.tenant.id,
+        name: data.tenant.name,
+        createdAt: data.tenant.createdAt,
+      },
+    };
+  } catch (error) {
+    console.error('Login error:', error);
     return null;
   }
-
-  const tenants = storage.getTenants();
-  const tenant = tenants.find((t) => t.id === user.tenantId);
-
-  if (!tenant) {
-    return null;
-  }
-
-  storage.setCurrentUser(user);
-  return { user, tenant };
 };
 
 export const logout = () => {
-  storage.setCurrentUser(null);
+  authAPI.logout();
 };
 
-export const getCurrentAuth = (): { user: User; tenant: Tenant } | null => {
-  const user = storage.getCurrentUser();
-  if (!user) {
+export const getCurrentAuth = async (): Promise<{ user: User; tenant: Tenant } | null> => {
+  try {
+    const data = await authAPI.getCurrentUser();
+    return {
+      user: {
+        id: data.user.id,
+        tenantId: data.user.tenantId,
+        email: data.user.email,
+        password: '', // Don't store password
+        name: data.user.name,
+        role: data.user.role as User['role'],
+        createdAt: new Date().toISOString(),
+      },
+      tenant: {
+        id: data.tenant.id,
+        name: data.tenant.name,
+        createdAt: data.tenant.createdAt,
+      },
+    };
+  } catch (error) {
+    console.error('Get current auth error:', error);
     return null;
   }
-
-  const tenants = storage.getTenants();
-  const tenant = tenants.find((t) => t.id === user.tenantId);
-
-  if (!tenant) {
-    return null;
-  }
-
-  return { user, tenant };
 };
 
-export const registerHospital = (hospitalName: string, adminEmail: string, adminName: string, password: string): boolean => {
-  const tenants = storage.getTenants();
-  const users = storage.getUsers();
-
-  if (users.some((u) => u.email === adminEmail)) {
+export const registerHospital = async (
+  hospitalName: string,
+  adminEmail: string,
+  adminName: string,
+  password: string
+): Promise<boolean> => {
+  try {
+    await authAPI.register(hospitalName, adminEmail, adminName, password);
+    return true;
+  } catch (error) {
+    console.error('Registration error:', error);
     return false;
   }
-
-  const tenantId = `tenant-${Date.now()}`;
-  const userId = `user-${Date.now()}`;
-
-  const newTenant: Tenant = {
-    id: tenantId,
-    name: hospitalName,
-    createdAt: new Date().toISOString(),
-  };
-
-  const newUser: User = {
-    id: userId,
-    tenantId,
-    email: adminEmail,
-    password,
-    name: adminName,
-    role: 'HOSPITAL_ADMIN',
-    createdAt: new Date().toISOString(),
-  };
-
-  storage.setTenants([...tenants, newTenant]);
-  storage.setUsers([...users, newUser]);
-
-  return true;
 };

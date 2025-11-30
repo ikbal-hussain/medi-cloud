@@ -12,15 +12,24 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const result = login(email, password);
-    if (result) {
-      onSuccess();
-    } else {
+    try {
+      const result = await login(email, password);
+      if (result) {
+        onSuccess();
+      } else {
+        setError('Invalid email or password');
+      }
+    } catch (err) {
       setError('Invalid email or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,9 +89,10 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
 
           <button
             type="submit"
-            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+            disabled={loading}
+            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 

@@ -14,17 +14,25 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const success = registerHospital(hospitalName, email, adminName, password);
-    if (success) {
-      login(email, password);
-      onSuccess();
-    } else {
-      setError('Email already exists or registration failed');
+    try {
+      const success = await registerHospital(hospitalName, email, adminName, password);
+      if (success) {
+        await login(email, password);
+        onSuccess();
+      } else {
+        setError('Email already exists or registration failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,9 +121,10 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
 
           <button
             type="submit"
-            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+            disabled={loading}
+            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Hospital Account
+            {loading ? 'Creating account...' : 'Create Hospital Account'}
           </button>
         </form>
       </div>

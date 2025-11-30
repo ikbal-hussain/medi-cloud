@@ -1,33 +1,49 @@
 import { useEffect, useState } from 'react';
-import { initializeDemoData } from './utils/storage';
 import { getCurrentAuth, logout as authLogout } from './utils/auth';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authData, setAuthData] = useState<ReturnType<typeof getCurrentAuth>>(null);
+  const [authData, setAuthData] = useState<Awaited<ReturnType<typeof getCurrentAuth>>>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    initializeDemoData();
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
-    const auth = getCurrentAuth();
-    if (auth) {
-      setAuthData(auth);
-      setIsAuthenticated(true);
-    } else {
+  const checkAuth = async () => {
+    setLoading(true);
+    try {
+      const auth = await getCurrentAuth();
+      if (auth) {
+        setAuthData(auth);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setAuthData(null);
+      }
+    } catch (error) {
       setIsAuthenticated(false);
       setAuthData(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     authLogout();
-    checkAuth();
+    setIsAuthenticated(false);
+    setAuthData(null);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !authData) {
     return <LandingPage onAuthSuccess={checkAuth} />;

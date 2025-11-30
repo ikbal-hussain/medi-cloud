@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, UserCog, Mail, Shield } from 'lucide-react';
 import { User, UserRole } from '../types';
-import { storage } from '../utils/storage';
+import { usersAPI } from '../utils/api';
 
 interface UserManagementProps {
   tenantId: string;
@@ -16,24 +16,25 @@ export default function UserManagement({ tenantId, userRole }: UserManagementPro
     loadUsers();
   }, [tenantId]);
 
-  const loadUsers = () => {
-    const allUsers = storage.getUsers();
-    const tenantUsers = allUsers.filter((u) => u.tenantId === tenantId);
-    setUsers(tenantUsers);
+  const loadUsers = async () => {
+    try {
+      const allUsers = await usersAPI.getAll();
+      const tenantUsers = allUsers.filter((u) => u.tenantId === tenantId);
+      setUsers(tenantUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
   };
 
-  const handleAddUser = (newUser: Omit<User, 'id' | 'tenantId' | 'createdAt'>) => {
-    const user: User = {
-      ...newUser,
-      id: `user-${Date.now()}`,
-      tenantId,
-      createdAt: new Date().toISOString(),
-    };
-
-    const allUsers = storage.getUsers();
-    storage.setUsers([...allUsers, user]);
-    loadUsers();
-    setShowAddModal(false);
+  const handleAddUser = async (newUser: Omit<User, 'id' | 'tenantId' | 'createdAt'>) => {
+    try {
+      await usersAPI.create(newUser);
+      await loadUsers();
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Failed to add user:', error);
+      alert('Failed to add user. Please try again.');
+    }
   };
 
   if (userRole !== 'HOSPITAL_ADMIN') {
