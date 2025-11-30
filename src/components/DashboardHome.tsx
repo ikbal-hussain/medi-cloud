@@ -1,7 +1,7 @@
 import { Users, UserPlus, Activity, TrendingUp } from 'lucide-react';
 import { User, Tenant } from '../types';
-import { storage } from '../utils/storage';
-import { useMemo } from 'react';
+import { patientsAPI, usersAPI, prescriptionsAPI } from '../utils/api';
+import { useState, useEffect } from 'react';
 
 interface DashboardHomeProps {
   user: User;
@@ -9,24 +9,60 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
-  const stats = useMemo(() => {
-    const patients = storage.getPatients().filter((p) => p.tenantId === user.tenantId);
-    const users = storage.getUsers().filter((u) => u.tenantId === user.tenantId);
-    const prescriptions = storage.getPrescriptions().filter((p) => p.tenantId === user.tenantId);
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    activePatients: 0,
+    opdPatients: 0,
+    ipdPatients: 0,
+    totalStaff: 0,
+    totalPrescriptions: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-    const activePatients = patients.filter((p) => p.status === 'Active').length;
-    const opdPatients = patients.filter((p) => p.type === 'OPD' && p.status === 'Active').length;
-    const ipdPatients = patients.filter((p) => p.type === 'IPD' && p.status === 'Active').length;
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const [patients, users, prescriptions] = await Promise.all([
+          patientsAPI.getAll(),
+          usersAPI.getAll(),
+          prescriptionsAPI.getAll(),
+        ]);
 
-    return {
-      totalPatients: patients.length,
-      activePatients,
-      opdPatients,
-      ipdPatients,
-      totalStaff: users.length,
-      totalPrescriptions: prescriptions.length,
+        // Filter by tenant
+        const tenantPatients = patients.filter((p) => p.tenantId === user.tenantId);
+        const tenantUsers = users.filter((u) => u.tenantId === user.tenantId);
+        const tenantPrescriptions = prescriptions.filter((p) => p.tenantId === user.tenantId);
+
+        const activePatients = tenantPatients.filter((p) => p.status === 'Active').length;
+        const opdPatients = tenantPatients.filter((p) => p.type === 'OPD' && p.status === 'Active').length;
+        const ipdPatients = tenantPatients.filter((p) => p.type === 'IPD' && p.status === 'Active').length;
+
+        setStats({
+          totalPatients: tenantPatients.length,
+          activePatients,
+          opdPatients,
+          ipdPatients,
+          totalStaff: tenantUsers.length,
+          totalPrescriptions: tenantPrescriptions.length,
+        });
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    loadStats();
   }, [user.tenantId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
