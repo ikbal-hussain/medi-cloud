@@ -152,7 +152,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6">
+        {/* <div className="bg-white rounded-xl shadow-md p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <button className="w-full text-left px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors">
@@ -172,7 +172,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
               </button>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
