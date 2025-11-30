@@ -129,6 +129,13 @@ This frontend requires the [Medi Cloud Backend](https://github.com/ikbal-hussain
 **Backend API:** [https://medi-cloud-backend.onrender.com](https://medi-cloud-backend.onrender.com)
 
 ---
+## 👤 Author
+
+**Ikbal Hussain**
+
+- GitHub: [@ikbal-hussain](https://github.com/ikbal-hussain)
+
+---
 
 **⭐ If you find this project helpful, please consider giving it a star!**
 
