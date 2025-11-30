@@ -56,7 +56,7 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
         <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="h-5 w-5" />
           <span>Add Patient</span>
@@ -72,13 +72,13 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name or phone..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as 'ALL' | 'OPD' | 'IPD')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="ALL">All Types</option>
             <option value="OPD">OPD</option>
@@ -87,7 +87,7 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as 'ALL' | 'Active' | 'Discharged')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="ALL">All Status</option>
             <option value="Active">Active</option>
@@ -101,8 +101,8 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
           <div key={patient.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
-                <div className="bg-teal-100 p-3 rounded-full">
-                  <User className="h-6 w-6 text-teal-600" />
+                <div className="bg-primary-100 p-3 rounded-full">
+                  <User className="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{patient.name}</h3>
@@ -127,7 +127,7 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     patient.type === 'OPD'
                       ? 'bg-blue-100 text-blue-700'
-                      : 'bg-teal-100 text-teal-700'
+                      : 'bg-primary-100 text-primary-700'
                   }`}
                 >
                   {patient.type}
@@ -194,7 +194,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             />
           </div>
@@ -206,7 +206,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
                 type="number"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
                 min="0"
                 max="150"
@@ -217,7 +217,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'Male' | 'Female' | 'Other' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -232,7 +232,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             />
           </div>
@@ -242,7 +242,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
             <textarea
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               rows={2}
               required
             />
@@ -254,7 +254,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'OPD' | 'IPD' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="OPD">OPD</option>
                 <option value="IPD">IPD</option>
@@ -265,7 +265,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Active' | 'Discharged' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="Active">Active</option>
                 <option value="Discharged">Discharged</option>
@@ -283,7 +283,7 @@ function AddPatientModal({ onClose, onAdd }: AddPatientModalProps) {
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Add Patient
             </button>

@@ -44,8 +44,8 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
         </button>
 
         <div className="flex items-center justify-center mb-6">
-          <div className="bg-teal-100 p-3 rounded-full">
-            <LogIn className="h-8 w-8 text-teal-600" />
+          <div className="bg-primary-100 p-3 rounded-full">
+            <LogIn className="h-8 w-8 text-primary-600" />
           </div>
         </div>
 
@@ -67,7 +67,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="admin@city.com"
               required
             />
@@ -81,7 +81,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="••••••"
               required
             />
@@ -90,7 +90,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

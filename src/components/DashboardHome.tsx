@@ -96,14 +96,14 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-teal-500">
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-primary-500">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Staff</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalStaff}</p>
             </div>
-            <div className="bg-teal-100 p-3 rounded-full">
-              <UserPlus className="h-8 w-8 text-teal-600" />
+            <div className="bg-primary-100 p-3 rounded-full">
+              <UserPlus className="h-8 w-8 text-primary-600" />
             </div>
           </div>
         </div>
@@ -140,11 +140,11 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">IPD Patients</span>
-                <span className="text-sm font-bold text-teal-600">{stats.ipdPatients}</span>
+                <span className="text-sm font-bold text-primary-600">{stats.ipdPatients}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  className="bg-teal-600 h-2 rounded-full"
+                  className="bg-primary-600 h-2 rounded-full"
                   style={{ width: `${stats.activePatients > 0 ? (stats.ipdPatients / stats.activePatients) * 100 : 0}%` }}
                 ></div>
               </div>
@@ -155,9 +155,9 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
         <div className="bg-white rounded-xl shadow-md p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full text-left px-4 py-3 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">
-              <p className="font-medium text-teal-900">Add New Patient</p>
-              <p className="text-sm text-teal-700">Register a new patient in the system</p>
+            <button className="w-full text-left px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors">
+              <p className="font-medium text-primary-900">Add New Patient</p>
+              <p className="text-sm text-primary-700">Register a new patient in the system</p>
             </button>
             {(user.role === 'DOCTOR' || user.role === 'HOSPITAL_ADMIN') && (
               <button className="w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">

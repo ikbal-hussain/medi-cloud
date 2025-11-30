@@ -12,25 +12,25 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
   const [showRegister, setShowRegister] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-primary-50">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Activity className="h-8 w-8 text-teal-600" />
+              <Activity className="h-8 w-8 text-primary-600" />
               <span className="text-2xl font-bold text-gray-900">MediCloud</span>
             </div>
             <div className="flex space-x-4">
               <button
                 onClick={() => setShowLogin(true)}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-teal-600 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-primary-600 transition-colors"
               >
                 <LogIn className="h-5 w-5" />
                 <span>Login</span>
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className="flex items-center space-x-2 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                className="flex items-center space-x-2 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <UserPlus className="h-5 w-5" />
                 <span>Register Hospital</span>
@@ -44,7 +44,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Modern Healthcare Management
-            <span className="block text-teal-600 mt-2">Made Simple</span>
+            <span className="block text-primary-600 mt-2">Made Simple</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Streamline your hospital operations with our comprehensive SaaS platform.
@@ -53,13 +53,13 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
           <div className="mt-8 flex justify-center space-x-4">
             <button
               onClick={() => setShowRegister(true)}
-              className="px-8 py-3 bg-teal-600 text-white text-lg font-semibold rounded-lg hover:bg-teal-700 transition-colors shadow-lg"
+              className="px-8 py-3 bg-primary-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-lg"
             >
               Get Started Free
             </button>
             <button
               onClick={() => setShowLogin(true)}
-              className="px-8 py-3 bg-white text-teal-600 text-lg font-semibold rounded-lg hover:bg-gray-50 transition-colors border-2 border-teal-600"
+              className="px-8 py-3 bg-white text-primary-600 text-lg font-semibold rounded-lg hover:bg-gray-50 transition-colors border-2 border-primary-600"
             >
               Sign In
             </button>
@@ -78,8 +78,8 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
           </div>
 
           <div className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-shadow">
-            <div className="bg-teal-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
-              <Users className="h-8 w-8 text-teal-600" />
+            <div className="bg-primary-100 w-14 h-14 rounded-lg flex items-center justify-center mb-4">
+              <Users className="h-8 w-8 text-primary-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Role-Based Access</h3>
             <p className="text-gray-600">
@@ -104,7 +104,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center mt-1">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center mt-1">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -115,7 +115,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center mt-1">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center mt-1">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -126,7 +126,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center mt-1">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center mt-1">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -137,7 +137,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center mt-1">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center mt-1">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>

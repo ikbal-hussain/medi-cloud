@@ -85,7 +85,7 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
         <h1 className="text-3xl font-bold text-gray-900">Prescription Management</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="h-5 w-5" />
           <span>New Prescription</span>
@@ -97,8 +97,8 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
           <div key={prescription.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start space-x-4">
-                <div className="bg-teal-100 p-3 rounded-full">
-                  <FileText className="h-6 w-6 text-teal-600" />
+                <div className="bg-primary-100 p-3 rounded-full">
+                  <FileText className="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{getPatientName(prescription.patientId)}</h3>
@@ -181,7 +181,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
             <select
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             >
               <option value="">Choose a patient...</option>
@@ -201,7 +201,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
               type="text"
               value={formData.diagnosis}
               onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="e.g., Acute Bronchitis"
               required
             />
@@ -212,7 +212,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
             <textarea
               value={formData.medications}
               onChange={(e) => setFormData({ ...formData, medications: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               rows={6}
               placeholder="List medications with dosage and frequency..."
               required
@@ -227,7 +227,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               rows={3}
               placeholder="Any special instructions or notes..."
             />
@@ -243,7 +243,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Create Prescription
             </button>

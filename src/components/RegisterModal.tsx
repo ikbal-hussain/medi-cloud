@@ -47,8 +47,8 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
         </button>
 
         <div className="flex items-center justify-center mb-6">
-          <div className="bg-teal-100 p-3 rounded-full">
-            <Building2 className="h-8 w-8 text-teal-600" />
+          <div className="bg-primary-100 p-3 rounded-full">
+            <Building2 className="h-8 w-8 text-primary-600" />
           </div>
         </div>
 
@@ -70,7 +70,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
               type="text"
               value={hospitalName}
               onChange={(e) => setHospitalName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Sunrise Medical Center"
               required
             />
@@ -84,7 +84,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
               type="text"
               value={adminName}
               onChange={(e) => setAdminName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Dr. John Doe"
               required
             />
@@ -98,7 +98,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="admin@hospital.com"
               required
             />
@@ -112,7 +112,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="••••••"
               required
               minLength={3}
@@ -122,7 +122,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating account...' : 'Create Hospital Account'}
           </button>

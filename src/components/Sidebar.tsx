@@ -22,7 +22,7 @@ export default function Sidebar({ userRole, currentPage, onPageChange }: Sidebar
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-2">
-          <Activity className="h-8 w-8 text-teal-600" />
+          <Activity className="h-8 w-8 text-primary-600" />
           <span className="text-xl font-bold text-gray-900">MediCloud</span>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function Sidebar({ userRole, currentPage, onPageChange }: Sidebar
               onClick={() => onPageChange(item.id)}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-teal-50 text-teal-700'
+                  ? 'bg-primary-50 text-primary-700'
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >

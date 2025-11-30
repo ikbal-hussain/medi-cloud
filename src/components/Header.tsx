@@ -13,7 +13,7 @@ export default function Header({ user, tenant, onLogout }: HeaderProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 text-gray-700">
-            <Building2 className="h-5 w-5 text-teal-600" />
+            <Building2 className="h-5 w-5 text-primary-600" />
             <span className="font-semibold text-lg">{tenant.name}</span>
           </div>
         </div>
