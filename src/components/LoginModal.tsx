@@ -99,9 +99,10 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-700 font-medium mb-2">Demo Accounts:</p>
           <div className="text-xs text-gray-600 space-y-1">
-            <p><strong>City Hospital Admin:</strong> admin@city.com / 123</p>
-            <p><strong>City Hospital Doctor:</strong> doc@city.com / 123</p>
-            <p><strong>Galaxy Care Admin:</strong> admin@galaxy.com / 123</p>
+            <p><strong>Assam Hospital Admin:</strong> admin@city.com / admin123</p>
+            <p><strong>Assam Hospital Doctor:</strong> doc@city.com / doc123</p>
+            <p><strong>Pune Galaxy Hospital Admin:</strong> admin@galaxy.com / admin123</p>
+            <p><strong>Assam Hospital Nurse:</strong> nurse@city.com / nurse123</p>
           </div>
         </div>
       </div>
