@@ -126,7 +126,7 @@ The frontend calls the API at `VITE_API_URL`:
 This frontend requires the [Medi Cloud Backend](https://github.com/ikbal-hussain/medi-cloud-backend) API to be running.
 
 **Backend Repository:** [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend)  
-**Backend API:** [https://medi-cloud-backend.vercel.app](https://medi-cloud-backend.vercel.app/api/health)
+**Backend API:** `https://medi-cloud-backend.vercel.app/api` ([health check](https://medi-cloud-backend.vercel.app/api/health))
 
 ---
 ## 👤 Author
