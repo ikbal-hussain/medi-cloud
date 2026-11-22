@@ -95,9 +95,9 @@ medi-cloud/
 
 ## 🔌 API Integration
 
-The frontend connects to the backend API. By default, it uses:
-- **Development:** `http://localhost:3000/api`
-- **Production:** `https://medi-cloud-backend.onrender.com/api`
+The frontend calls the API at `VITE_API_URL`:
+- **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
+- **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify)
 
 ---
 
@@ -126,7 +126,7 @@ The frontend connects to the backend API. By default, it uses:
 This frontend requires the [Medi Cloud Backend](https://github.com/ikbal-hussain/medi-cloud-backend) API to be running.
 
 **Backend Repository:** [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend)  
-**Backend API:** [https://medi-cloud-backend.onrender.com](https://medi-cloud-backend.onrender.com)
+**Backend API:** `https://medi-cloud-backend.vercel.app/api` ([health check](https://medi-cloud-backend.vercel.app/api/health))
 
 ---
 ## 👤 Author
