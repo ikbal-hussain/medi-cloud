@@ -10,7 +10,6 @@ export interface User {
   id: string;
   tenantId: string;
   email: string;
-  password: string;
   name: string;
   role: UserRole;
   createdAt: string;

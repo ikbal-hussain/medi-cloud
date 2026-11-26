@@ -29,8 +29,8 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
       } else {
         setError('Email already exists or registration failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (err) {
+      setError((err instanceof Error && err.message) || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

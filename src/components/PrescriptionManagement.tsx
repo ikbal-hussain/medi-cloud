@@ -9,7 +9,7 @@ interface PrescriptionManagementProps {
   userRole: UserRole;
 }
 
-export default function PrescriptionManagement({ tenantId, userId, userRole }: PrescriptionManagementProps) {
+export default function PrescriptionManagement({ tenantId, userRole }: PrescriptionManagementProps) {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);

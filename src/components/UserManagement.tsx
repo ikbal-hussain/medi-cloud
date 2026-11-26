@@ -3,6 +3,9 @@ import { Plus, UserCog, Mail, Shield } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { usersAPI } from '../utils/api';
 
+// A new staff member: the user fields plus the initial password, which is never sent back by the API.
+type NewUser = Omit<User, 'id' | 'tenantId' | 'createdAt'> & { password: string };
+
 interface UserManagementProps {
   tenantId: string;
   userRole: UserRole;
@@ -26,7 +29,7 @@ export default function UserManagement({ tenantId, userRole }: UserManagementPro
     }
   };
 
-  const handleAddUser = async (newUser: Omit<User, 'id' | 'tenantId' | 'createdAt'>) => {
+  const handleAddUser = async (newUser: NewUser) => {
     try {
       await usersAPI.create(newUser);
       await loadUsers();
@@ -100,7 +103,7 @@ export default function UserManagement({ tenantId, userRole }: UserManagementPro
 
 interface AddUserModalProps {
   onClose: () => void;
-  onAdd: (user: Omit<User, 'id' | 'tenantId' | 'createdAt'>) => void;
+  onAdd: (user: NewUser) => void;
 }
 
 function AddUserModal({ onClose, onAdd }: AddUserModalProps) {
