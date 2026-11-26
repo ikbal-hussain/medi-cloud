@@ -1,3 +1,5 @@
+import type { Patient, UserRole } from '../types';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Get auth token from localStorage
@@ -15,15 +17,23 @@ const removeToken = (): void => {
   localStorage.removeItem('auth_token');
 };
 
+// An API failure that keeps the HTTP status, so callers can tell a rejected token (401) from a network or server error.
+export class ApiError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 // API request helper
 const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
   const token = getToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string> | undefined),
   };
 
   if (token) {
@@ -36,8 +46,8 @@ const apiRequest = async <T>(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    const body = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new ApiError(body.error || `HTTP error! status: ${response.status}`, response.status);
   }
 
   return response.json();
@@ -81,6 +91,8 @@ export const authAPI = {
   logout: () => {
     removeToken();
   },
+
+  hasToken: (): boolean => getToken() !== null,
 };
 
 // Users API
@@ -91,7 +103,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>>('/users');
     return users;
@@ -103,7 +115,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>(`/users/${id}`);
   },
@@ -114,7 +126,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>('/users', {
       method: 'POST',
@@ -128,7 +140,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>(`/users/${id}`, {
       method: 'PUT',
@@ -151,12 +163,12 @@ export const patientsAPI = {
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>>('/patients');
     return patients;
   },
@@ -167,36 +179,36 @@ export const patientsAPI = {
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>(`/patients/${id}`);
   },
 
   create: async (patient: {
     name: string;
     age: number;
-    gender: string;
-    type: string;
+    gender: Patient['gender'];
+    type: Patient['type'];
     phoneNumber: string;
     address: string;
     admissionDate: string;
-    status?: string;
+    status?: Patient['status'];
   }) => {
     return apiRequest<{
       id: string;
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>('/patients', {
       method: 'POST',
       body: JSON.stringify(patient),
@@ -206,24 +218,24 @@ export const patientsAPI = {
   update: async (id: string, patient: {
     name?: string;
     age?: number;
-    gender?: string;
-    type?: string;
+    gender?: Patient['gender'];
+    type?: Patient['type'];
     phoneNumber?: string;
     address?: string;
     admissionDate?: string;
-    status?: string;
+    status?: Patient['status'];
   }) => {
     return apiRequest<{
       id: string;
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>(`/patients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(patient),

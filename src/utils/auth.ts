@@ -1,5 +1,5 @@
 import { User, Tenant } from '../types';
-import { authAPI } from './api';
+import { authAPI, ApiError } from './api';
 
 export const login = async (email: string, password: string): Promise<{ user: User; tenant: Tenant } | null> => {
   try {
@@ -9,7 +9,6 @@ export const login = async (email: string, password: string): Promise<{ user: Us
         id: data.user.id,
         tenantId: data.user.tenantId,
         email: data.user.email,
-        password: '', // Don't store password
         name: data.user.name,
         role: data.user.role as User['role'],
         createdAt: new Date().toISOString(),
@@ -31,6 +30,8 @@ export const logout = () => {
 };
 
 export const getCurrentAuth = async (): Promise<{ user: User; tenant: Tenant } | null> => {
+  // Nobody has logged in on this browser: there's no session to check, so don't ask the server.
+  if (!authAPI.hasToken()) return null;
   try {
     const data = await authAPI.getCurrentUser();
     return {
@@ -38,7 +39,6 @@ export const getCurrentAuth = async (): Promise<{ user: User; tenant: Tenant } |
         id: data.user.id,
         tenantId: data.user.tenantId,
         email: data.user.email,
-        password: '', // Don't store password
         name: data.user.name,
         role: data.user.role as User['role'],
         createdAt: new Date().toISOString(),
@@ -50,6 +50,11 @@ export const getCurrentAuth = async (): Promise<{ user: User; tenant: Tenant } |
       },
     };
   } catch (error) {
+    // An expired or invalid token: forget it, so the next visit doesn't send it again. That's a logged-out user, not an error.
+    if (error instanceof ApiError && error.status === 401) {
+      authAPI.logout();
+      return null;
+    }
     console.error('Get current auth error:', error);
     return null;
   }
