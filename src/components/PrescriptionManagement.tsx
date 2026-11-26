@@ -6,10 +6,11 @@ import { prescriptionsAPI, patientsAPI, usersAPI } from '../utils/api';
 interface PrescriptionManagementProps {
   tenantId: string;
   userId: string;
+  userName: string;
   userRole: UserRole;
 }
 
-export default function PrescriptionManagement({ tenantId, userId, userRole }: PrescriptionManagementProps) {
+export default function PrescriptionManagement({ tenantId, userId, userName, userRole }: PrescriptionManagementProps) {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -50,7 +51,11 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
 
   const [doctors, setDoctors] = useState<Array<{ id: string; name: string }>>([]);
 
+  // Only admins may list staff (a doctor gets a 403), so only admins look up other doctors' names here.
+  const canListStaff = userRole === 'HOSPITAL_ADMIN' || userRole === 'SUPER_ADMIN';
+
   useEffect(() => {
+    if (!canListStaff) return;
     const loadDoctors = async () => {
       try {
         const allUsers = await usersAPI.getAll();
@@ -63,11 +68,12 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
       }
     };
     loadDoctors();
-  }, [tenantId]);
+  }, [tenantId, canListStaff]);
 
-  const getDoctorName = (doctorId: string) => {
-    const doctor = doctors.find((d) => d.id === doctorId);
-    return doctor?.name || 'Unknown Doctor';
+  const getDoctorName = (prescription: Prescription) => {
+    if (prescription.doctorName) return prescription.doctorName;
+    if (prescription.doctorId === userId) return userName;
+    return doctors.find((d) => d.id === prescription.doctorId)?.name || 'Unknown Doctor';
   };
 
   if (userRole === 'RECEPTIONIST') {
@@ -104,7 +110,7 @@ export default function PrescriptionManagement({ tenantId, userId, userRole }: P
                   <h3 className="text-lg font-bold text-gray-900">{getPatientName(prescription.patientId)}</h3>
                   <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
                     <User className="h-4 w-4" />
-                    <span>Dr. {getDoctorName(prescription.doctorId)}</span>
+                    <span>{getDoctorName(prescription)}</span>
                   </div>
                   <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />

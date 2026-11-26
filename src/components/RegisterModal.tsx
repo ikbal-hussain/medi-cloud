@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Building2 } from 'lucide-react';
 import { registerHospital } from '../utils/auth';
-import { login } from '../utils/auth';
+import { errorMessage } from '../utils/api';
 
 interface RegisterModalProps {
   onClose: () => void;
@@ -22,15 +22,11 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
     setLoading(true);
 
     try {
-      const success = await registerHospital(hospitalName, email, adminName, password);
-      if (success) {
-        await login(email, password);
-        onSuccess();
-      } else {
-        setError('Email already exists or registration failed');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      // Registering also logs the new admin in (the API returns a token), so no separate login call.
+      await registerHospital(hospitalName, email, adminName, password);
+      onSuccess();
+    } catch (err) {
+      setError(errorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }

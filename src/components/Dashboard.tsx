@@ -27,7 +27,7 @@ export default function Dashboard({ user, tenant, onLogout }: DashboardProps) {
       case 'users':
         return <UserManagement tenantId={user.tenantId} userRole={user.role} />;
       case 'prescriptions':
-        return <PrescriptionManagement tenantId={user.tenantId} userId={user.id} userRole={user.role} />;
+        return <PrescriptionManagement tenantId={user.tenantId} userId={user.id} userName={user.name} userRole={user.role} />;
       default:
         return <DashboardHome user={user} tenant={tenant} />;
     }

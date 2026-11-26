@@ -1,3 +1,5 @@
+import type { Patient, UserRole } from '../types';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Get auth token from localStorage
@@ -15,20 +17,32 @@ const removeToken = (): void => {
   localStorage.removeItem('auth_token');
 };
 
+// An API failure that keeps the HTTP status, so callers can tell a rejected token (401) from a network or server error.
+export class ApiError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// A message fit to show the user for any failure from the API helpers.
+export const errorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof ApiError) return error.message;
+  // fetch() rejects with a TypeError when the server can't be reached at all.
+  if (error instanceof TypeError) return "Can't reach the server. Check your connection and try again.";
+  return fallback;
+};
+
 // API request helper
 const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
   const token = getToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  // new Headers() accepts every HeadersInit form (object, array of pairs, Headers), so a caller's headers are never dropped.
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -36,8 +50,8 @@ const apiRequest = async <T>(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    const body = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new ApiError(body.error || `HTTP error! status: ${response.status}`, response.status);
   }
 
   return response.json();
@@ -81,6 +95,13 @@ export const authAPI = {
   logout: () => {
     removeToken();
   },
+
+  currentToken: (): string | null => getToken(),
+
+  // Remove the token only if it's still the one given: another tab may have logged in and saved a new one meanwhile.
+  forgetToken: (token: string) => {
+    if (getToken() === token) removeToken();
+  },
 };
 
 // Users API
@@ -91,7 +112,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>>('/users');
     return users;
@@ -103,7 +124,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>(`/users/${id}`);
   },
@@ -114,7 +135,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>('/users', {
       method: 'POST',
@@ -128,7 +149,7 @@ export const usersAPI = {
       tenantId: string;
       email: string;
       name: string;
-      role: string;
+      role: UserRole;
       createdAt: string;
     }>(`/users/${id}`, {
       method: 'PUT',
@@ -151,12 +172,12 @@ export const patientsAPI = {
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>>('/patients');
     return patients;
   },
@@ -167,36 +188,36 @@ export const patientsAPI = {
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>(`/patients/${id}`);
   },
 
   create: async (patient: {
     name: string;
     age: number;
-    gender: string;
-    type: string;
+    gender: Patient['gender'];
+    type: Patient['type'];
     phoneNumber: string;
     address: string;
     admissionDate: string;
-    status?: string;
+    status?: Patient['status'];
   }) => {
     return apiRequest<{
       id: string;
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>('/patients', {
       method: 'POST',
       body: JSON.stringify(patient),
@@ -206,24 +227,24 @@ export const patientsAPI = {
   update: async (id: string, patient: {
     name?: string;
     age?: number;
-    gender?: string;
-    type?: string;
+    gender?: Patient['gender'];
+    type?: Patient['type'];
     phoneNumber?: string;
     address?: string;
     admissionDate?: string;
-    status?: string;
+    status?: Patient['status'];
   }) => {
     return apiRequest<{
       id: string;
       tenantId: string;
       name: string;
       age: number;
-      gender: string;
-      type: string;
+      gender: Patient['gender'];
+      type: Patient['type'];
       phoneNumber: string;
       address: string;
       admissionDate: string;
-      status: string;
+      status: Patient['status'];
     }>(`/patients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(patient),

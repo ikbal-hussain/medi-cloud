@@ -10,7 +10,6 @@ export interface User {
   id: string;
   tenantId: string;
   email: string;
-  password: string;
   name: string;
   role: UserRole;
   createdAt: string;
@@ -34,6 +33,7 @@ export interface Prescription {
   tenantId: string;
   patientId: string;
   doctorId: string;
+  doctorName?: string; // sent by newer API versions; older ones only send doctorId
   medications: string;
   diagnosis: string;
   notes: string;
