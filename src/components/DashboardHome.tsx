@@ -9,54 +9,64 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
-  const [stats, setStats] = useState({
-    totalPatients: 0,
-    activePatients: 0,
-    opdPatients: 0,
-    ipdPatients: 0,
-    totalStaff: 0,
-    totalPrescriptions: 0,
+  // null = that number couldn't be loaded; shown as "—" rather than a 0 that looks like real data.
+  const [stats, setStats] = useState<{
+    totalPatients: number | null;
+    activePatients: number | null;
+    opdPatients: number | null;
+    ipdPatients: number | null;
+    totalStaff: number | null;
+    totalPrescriptions: number | null;
+  }>({
+    totalPatients: null,
+    activePatients: null,
+    opdPatients: null,
+    ipdPatients: null,
+    totalStaff: null,
+    totalPrescriptions: null,
   });
+  const [someFailed, setSomeFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const canSeeStaff = user.role === 'HOSPITAL_ADMIN' || user.role === 'SUPER_ADMIN';
 
   useEffect(() => {
     const loadStats = async () => {
-      try {
-        setLoading(true);
-        const [patients, users, prescriptions] = await Promise.all([
-          patientsAPI.getAll(),
-          // Only admins may list staff: asking as a doctor or receptionist gets a 403, which used to zero every stat.
-          canSeeStaff ? usersAPI.getAll() : Promise.resolve([]),
-          prescriptionsAPI.getAll(),
-        ]);
+      setLoading(true);
+      // Each request fills its own numbers, so one failure doesn't blank the rest.
+      const [patients, users, prescriptions] = await Promise.allSettled([
+        patientsAPI.getAll(),
+        // Only admins may list staff: asking as a doctor or receptionist gets a 403.
+        canSeeStaff ? usersAPI.getAll() : Promise.resolve([]),
+        prescriptionsAPI.getAll(),
+      ]);
 
-        // Filter by tenant
-        const tenantPatients = patients.filter((p) => p.tenantId === user.tenantId);
-        const tenantUsers = users.filter((u) => u.tenantId === user.tenantId);
-        const tenantPrescriptions = prescriptions.filter((p) => p.tenantId === user.tenantId);
+      const tenantPatients =
+        patients.status === 'fulfilled' ? patients.value.filter((p) => p.tenantId === user.tenantId) : null;
+      const active = tenantPatients?.filter((p) => p.status === 'Active') ?? null;
 
-        const activePatients = tenantPatients.filter((p) => p.status === 'Active').length;
-        const opdPatients = tenantPatients.filter((p) => p.type === 'OPD' && p.status === 'Active').length;
-        const ipdPatients = tenantPatients.filter((p) => p.type === 'IPD' && p.status === 'Active').length;
-
-        setStats({
-          totalPatients: tenantPatients.length,
-          activePatients,
-          opdPatients,
-          ipdPatients,
-          totalStaff: tenantUsers.length,
-          totalPrescriptions: tenantPrescriptions.length,
-        });
-      } catch (error) {
-        console.error('Failed to load dashboard stats:', error);
-      } finally {
-        setLoading(false);
-      }
+      setStats({
+        totalPatients: tenantPatients?.length ?? null,
+        activePatients: active?.length ?? null,
+        opdPatients: active?.filter((p) => p.type === 'OPD').length ?? null,
+        ipdPatients: active?.filter((p) => p.type === 'IPD').length ?? null,
+        totalStaff: users.status === 'fulfilled' ? users.value.filter((u) => u.tenantId === user.tenantId).length : null,
+        totalPrescriptions:
+          prescriptions.status === 'fulfilled'
+            ? prescriptions.value.filter((p) => p.tenantId === user.tenantId).length
+            : null,
+      });
+      const failures = [patients, users, prescriptions].filter((r) => r.status === 'rejected');
+      failures.forEach((r) => console.error('Failed to load dashboard stats:', (r as PromiseRejectedResult).reason));
+      setSomeFailed(failures.length > 0);
+      setLoading(false);
     };
 
     loadStats();
   }, [user.tenantId, canSeeStaff]);
+
+  const show = (n: number | null) => (n === null ? '—' : n);
+  const share = (part: number | null) =>
+    part !== null && stats.activePatients ? (part / stats.activePatients) * 100 : 0;
 
   if (loading) {
     return (
@@ -73,12 +83,18 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
         <p className="text-gray-600 mt-2">Here's what's happening at {tenant.name} today</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {someFailed && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Some numbers couldn't be loaded and show as —. Refresh to try again.
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${canSeeStaff ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8`}>
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Patients</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalPatients}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{show(stats.totalPatients)}</p>
             </div>
             <div className="bg-blue-100 p-3 rounded-full">
               <Users className="h-8 w-8 text-blue-600" />
@@ -90,7 +106,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Patients</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.activePatients}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{show(stats.activePatients)}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <Activity className="h-8 w-8 text-green-600" />
@@ -103,7 +119,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Staff</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalStaff}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{show(stats.totalStaff)}</p>
               </div>
               <div className="bg-primary-100 p-3 rounded-full">
                 <UserPlus className="h-8 w-8 text-primary-600" />
@@ -116,7 +132,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Prescriptions</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalPrescriptions}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{show(stats.totalPrescriptions)}</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-full">
               <TrendingUp className="h-8 w-8 text-orange-600" />
@@ -132,24 +148,24 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">OPD Patients</span>
-                <span className="text-sm font-bold text-blue-600">{stats.opdPatients}</span>
+                <span className="text-sm font-bold text-blue-600">{show(stats.opdPatients)}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${stats.activePatients > 0 ? (stats.opdPatients / stats.activePatients) * 100 : 0}%` }}
+                  style={{ width: `${share(stats.opdPatients)}%` }}
                 ></div>
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">IPD Patients</span>
-                <span className="text-sm font-bold text-primary-600">{stats.ipdPatients}</span>
+                <span className="text-sm font-bold text-primary-600">{show(stats.ipdPatients)}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-primary-600 h-2 rounded-full"
-                  style={{ width: `${stats.activePatients > 0 ? (stats.ipdPatients / stats.activePatients) * 100 : 0}%` }}
+                  style={{ width: `${share(stats.ipdPatients)}%` }}
                 ></div>
               </div>
             </div>

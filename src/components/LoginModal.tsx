@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, LogIn } from 'lucide-react';
 import { login } from '../utils/auth';
+import { ApiError, errorMessage } from '../utils/api';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -20,14 +21,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
     setLoading(true);
 
     try {
-      const result = await login(email, password);
-      if (result) {
-        onSuccess();
-      } else {
-        setError('Invalid email or password');
-      }
-    } catch {
-      setError('Invalid email or password');
+      await login(email, password);
+      onSuccess();
+    } catch (err) {
+      // Only a 401 means the credentials were wrong; anything else is the server or the network.
+      setError(err instanceof ApiError && err.status === 401 ? 'Invalid email or password' : errorMessage(err, 'Login failed. Please try again.'));
     } finally {
       setLoading(false);
     }

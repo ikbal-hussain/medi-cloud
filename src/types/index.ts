@@ -33,6 +33,7 @@ export interface Prescription {
   tenantId: string;
   patientId: string;
   doctorId: string;
+  doctorName?: string; // sent by newer API versions; older ones only send doctorId
   medications: string;
   diagnosis: string;
   notes: string;

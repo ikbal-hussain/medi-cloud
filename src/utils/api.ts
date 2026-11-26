@@ -25,20 +25,24 @@ export class ApiError extends Error {
   }
 }
 
+// A message fit to show the user for any failure from the API helpers.
+export const errorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof ApiError) return error.message;
+  // fetch() rejects with a TypeError when the server can't be reached at all.
+  if (error instanceof TypeError) return "Can't reach the server. Check your connection and try again.";
+  return fallback;
+};
+
 // API request helper
 const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
   const token = getToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> | undefined),
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  // new Headers() accepts every HeadersInit form (object, array of pairs, Headers), so a caller's headers are never dropped.
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -92,7 +96,12 @@ export const authAPI = {
     removeToken();
   },
 
-  hasToken: (): boolean => getToken() !== null,
+  currentToken: (): string | null => getToken(),
+
+  // Remove the token only if it's still the one given: another tab may have logged in and saved a new one meanwhile.
+  forgetToken: (token: string) => {
+    if (getToken() === token) removeToken();
+  },
 };
 
 // Users API
