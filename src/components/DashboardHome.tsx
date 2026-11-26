@@ -18,6 +18,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
     totalPrescriptions: 0,
   });
   const [loading, setLoading] = useState(true);
+  const canSeeStaff = user.role === 'HOSPITAL_ADMIN' || user.role === 'SUPER_ADMIN';
 
   useEffect(() => {
     const loadStats = async () => {
@@ -25,7 +26,8 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
         setLoading(true);
         const [patients, users, prescriptions] = await Promise.all([
           patientsAPI.getAll(),
-          usersAPI.getAll(),
+          // Only admins may list staff: asking as a doctor or receptionist gets a 403, which used to zero every stat.
+          canSeeStaff ? usersAPI.getAll() : Promise.resolve([]),
           prescriptionsAPI.getAll(),
         ]);
 
@@ -54,7 +56,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
     };
 
     loadStats();
-  }, [user.tenantId]);
+  }, [user.tenantId, canSeeStaff]);
 
   if (loading) {
     return (
@@ -96,17 +98,19 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-primary-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Staff</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalStaff}</p>
-            </div>
-            <div className="bg-primary-100 p-3 rounded-full">
-              <UserPlus className="h-8 w-8 text-primary-600" />
+        {canSeeStaff && (
+          <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-primary-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Staff</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalStaff}</p>
+              </div>
+              <div className="bg-primary-100 p-3 rounded-full">
+                <UserPlus className="h-8 w-8 text-primary-600" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between">
