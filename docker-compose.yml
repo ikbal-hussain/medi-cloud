@@ -26,6 +26,8 @@ services:
       DATABASE_URL: postgresql://medi:medi@postgres:5432/medi_cloud
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env, e.g. echo "JWT_SECRET=$(openssl rand -hex 32)" > .env}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      # nginx (the web container) is the one proxy in front: trust its X-Forwarded-For for client IPs.
+      TRUST_PROXY: 1
     depends_on:
       postgres:
         condition: service_healthy
