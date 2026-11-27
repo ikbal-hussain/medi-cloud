@@ -1,6 +1,6 @@
 # Medi Cloud web app, served by nginx, which also forwards /api to the API container.
 # Build from the repo root: docker build -f apps/web/Dockerfile .
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
