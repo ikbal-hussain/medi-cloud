@@ -25,7 +25,7 @@ This is a monorepo: the React app is in `apps/web`, the API in `apps/api` (npm w
 ### Prerequisites
 
 - Node.js 20 or newer (22 recommended, see `.nvmrc`)
-- MongoDB running locally (`mongodb://localhost:27017`), or set `MONGODB_URI`
+- Docker (for PostgreSQL), or your own PostgreSQL 15+ and its URL in `apps/api/.env`
 
 ### Run it
 
@@ -33,8 +33,11 @@ This is a monorepo: the React app is in `apps/web`, the API in `apps/api` (npm w
 git clone https://github.com/ikbal-hussain/medi-cloud.git
 cd medi-cloud
 npm install
-npm run seed:demo   # optional: demo hospitals and users (wipes the database first)
-npm run dev         # API on http://localhost:3000, app on http://localhost:5173
+npm run db:up                           # PostgreSQL in Docker
+cp apps/api/.env.example apps/api/.env
+npm run db:migrate                      # create the tables
+npm run seed:demo                       # optional: demo hospitals and users (wipes the local database)
+npm run dev                             # API on http://localhost:3000, app on http://localhost:5173
 ```
 
 Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `doc123`, `nurse@city.com` / `nurse123`.
@@ -44,8 +47,9 @@ Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `
 ## 🛠️ Tech Stack
 
 - **Web:** React 18, TypeScript, Vite, Tailwind CSS, Lucide icons
-- **API:** Node.js, Express, MongoDB (Mongoose), JWT auth
-- **Tooling:** npm workspaces, ESLint, GitHub Actions CI
+- **API:** TypeScript, Express 5, PostgreSQL, Prisma 7, zod, JWT, pino logs
+- **Shared:** one package of zod schemas, types and error codes used by both
+- **Tooling:** npm workspaces, ESLint, Vitest + Supertest (against real PostgreSQL), Docker Compose, GitHub Actions CI
 
 ---
 
@@ -55,8 +59,11 @@ Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `
 medi-cloud/
 ├── apps/
 │   ├── web/        React app (Vite): src/components, src/utils/api.ts, src/types
-│   └── api/        Express API: src/routes, src/models, src/middleware (see apps/api/README.md)
-├── .github/workflows/ci.yml   lint, typecheck, build on every PR
+│   └── api/        REST API: prisma/ (schema, migrations, seed), src/modules (see apps/api/README.md)
+├── packages/
+│   └── shared/     zod schemas, response types, error codes, roles
+├── docker-compose.yml          PostgreSQL for local development
+├── .github/workflows/ci.yml    lint, typecheck, migration check, tests, build on every PR
 ├── netlify.toml    web app deploy (Netlify builds apps/web)
 └── package.json    workspace root and shared scripts
 ```
@@ -67,7 +74,7 @@ medi-cloud/
 
 The app calls the API at `VITE_API_URL`:
 - **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
-- **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify)
+- **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify; still the old MongoDB API until the PostgreSQL deploy ships)
 
 API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 
@@ -78,10 +85,11 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 | Script | Description |
 |--------|-------------|
 | `npm run dev` | Start the API and the app together |
-| `npm run build` | Build every workspace |
-| `npm run lint` | Lint every workspace |
-| `npm run typecheck` | Type-check every workspace |
-| `npm run seed:demo` | Reset the database and load demo data |
+| `npm run db:up` | Start PostgreSQL in Docker |
+| `npm run db:migrate` | Apply database migrations |
+| `npm run seed:demo` | Reset the local database and load demo data |
+| `npm test` | Run all tests (needs PostgreSQL running) |
+| `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace |
 
 ---
 

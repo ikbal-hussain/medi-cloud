@@ -2,6 +2,7 @@
   "name": "medi-cloud",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Open-source, multi-tenant hospital management platform",
   "license": "MIT",
   "workspaces": [
@@ -14,11 +15,21 @@
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @medi-cloud/api\" \"npm run dev -w @medi-cloud/web\"",
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "seed:demo": "npm run init:demo -w @medi-cloud/api"
+    "test": "npm run test --workspaces --if-present",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:migrate": "npm run db:migrate -w @medi-cloud/api",
+    "seed:demo": "npm run seed -w @medi-cloud/api"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "@eslint/js": "^9.9.1",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.9.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "globals": "^15.9.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.3.0"
   }
 }
