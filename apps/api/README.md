@@ -1,6 +1,8 @@
-# 🏥 Medi Cloud Backend
+# 🏥 Medi Cloud API
 
-> A robust RESTful API for hospital management system with multi-tenant architecture, JWT authentication, and role-based access control.
+> A RESTful API for the Medi Cloud hospital management platform: multi-tenant, JWT authentication, role-based access control.
+
+> ⚠️ **Not deployed from here yet.** The live API below still deploys from the old [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend) repo. This folder is being rewritten in TypeScript on PostgreSQL; the live API moves here when that ships. Until then, a change in `apps/api` does not reach production.
 
 **🌐 Live API:** `https://medi-cloud-backend.vercel.app/api` (on Vercel)
 
@@ -34,7 +36,7 @@
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js 20 or newer
 - MongoDB (local or cloud instance)
 - npm or yarn
 
@@ -53,7 +55,7 @@
 
 3. **Configure environment variables**
    
-   Create a `.env` file in the root directory:
+   Create `apps/api/.env` (the API reads its `.env` from its own folder, not the repo root):
    ```env
    PORT=3000
    MONGODB_URI=mongodb://localhost:27017/medi-cloud
@@ -222,7 +224,7 @@ curl -X GET https://medi-cloud-backend.vercel.app/api/patients \
 ## 🏗️ Project Structure
 
 ```
-medi-cloud-backend/
+apps/api/
 ├── src/
 │   ├── config/
 │   │   └── database.js          # MongoDB connection

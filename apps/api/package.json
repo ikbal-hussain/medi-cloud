@@ -7,7 +7,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "init:admin": "node src/scripts/initSuperAdmin.js",
-    "init:demo": "node src/scripts/initDemoData.js"
+    "init:demo": "node src/scripts/initDemoData.js",
+    "lint": "node scripts/check-syntax.js"
   },
   "license": "MIT",
   "dependencies": {

@@ -8,6 +8,16 @@ import connectDB from '../config/database.js';
 
 dotenv.config();
 
+// The script deletes every hospital, user, patient and prescription first. Only allow that on a local database,
+// unless ALLOW_DEMO_RESET=yes says the target really is a throwaway one.
+const target = process.env.MONGODB_URI || 'mongodb://localhost:27017/medi-cloud';
+const isLocal = /^mongodb:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(target);
+if (!isLocal && process.env.ALLOW_DEMO_RESET !== 'yes') {
+  console.error(`Refusing to wipe a non-local database (${target.replace(/\/\/[^@]*@/, '//***@')}).`);
+  console.error('Set ALLOW_DEMO_RESET=yes if it really is a throwaway database.');
+  process.exit(1);
+}
+
 const initDemoData = async () => {
   try {
     await connectDB();
