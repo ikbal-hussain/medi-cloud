@@ -1,4 +1,6 @@
-# Local development services. `docker compose up -d` starts PostgreSQL on localhost:5432.
+# `docker compose up -d postgres` (or `npm run db:up`): just PostgreSQL, for local development.
+# `docker compose up --build`: the whole platform on http://localhost:8080. Needs JWT_SECRET in a .env file
+# next to this one, e.g.  echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
 services:
   postgres:
     image: postgres:17-alpine
@@ -15,6 +17,33 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://medi:medi@postgres:5432/medi_cloud
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env, e.g. echo "JWT_SECRET=$(openssl rand -hex 32)" > .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health/db || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

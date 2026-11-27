@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+**/.vercel
+**/.netlify
+apps/api/src/generated
+.git
+**/test-results
+**/playwright-report
