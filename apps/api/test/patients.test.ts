@@ -16,11 +16,28 @@ describe('patients', () => {
     const city = await hospital('City');
     const asNurse = () => api().post('/api/patients').set(as(city.receptionist.id));
     expect((await asNurse().send(patientInput({ age: 0 }))).status).toBe(201);
-    for (const bad of [{ age: -1 }, { age: 2.5 }, { gender: 'Unknown' }, { type: 'ER' }, { admissionDate: 'yesterday' }, { name: '  ' }]) {
+    for (const bad of [
+      { age: -1 },
+      { age: 2.5 },
+      { age: '' },
+      { age: null },
+      { admissionDate: null },
+      { gender: 'Unknown' },
+      { type: 'ER' },
+      { admissionDate: 'yesterday' },
+      { name: '  ' },
+    ]) {
       const res = await asNurse().send(patientInput(bad));
       expect(res.status, JSON.stringify(bad)).toBe(400);
       expect(res.body.code).toBe('VALIDATION_ERROR');
     }
+  });
+
+  it("doesn't reset an age to 0 when a form sends it empty", async () => {
+    const city = await hospital('City');
+    const patient = await createPatient(city.tenant.id);
+    const res = await api().put(`/api/patients/${patient.id}`).set(as(city.doctor.id)).send({ age: null });
+    expect(res.status).toBe(400);
   });
 
   it('updates a patient', async () => {

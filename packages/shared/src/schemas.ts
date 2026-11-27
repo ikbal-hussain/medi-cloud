@@ -9,11 +9,22 @@ const email = z
   .toLowerCase()
   .pipe(z.email({ error: 'Enter a valid email address' }));
 
+/** Bytes a string takes in UTF-8 (no TextEncoder: this package runs in both Node and the browser). */
+const utf8Length = (text: string) => {
+  let bytes = 0;
+  for (const char of text) {
+    const code = char.codePointAt(0)!;
+    bytes += code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
+  }
+  return bytes;
+};
+
 /** A new password. Login doesn't use this: existing passwords are checked as they are. */
 export const newPassword = z
   .string({ error: 'Password is required' })
   .min(8, { error: 'Password must be at least 8 characters' })
-  .max(128, { error: 'Password must be at most 128 characters' });
+  // bcrypt only uses the first 72 bytes, so anything longer would be silently cut.
+  .refine((p) => utf8Length(p) <= 72, { error: 'Password must be at most 72 characters' });
 
 const name = (label: string, max = 120) =>
   z
@@ -53,16 +64,24 @@ export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
 const patientFields = {
   name: name('Name'),
-  age: z.coerce
-    .number({ error: 'Age must be a number' })
-    .int({ error: 'Age must be a whole number' })
-    .min(0, { error: 'Age cannot be negative' })
-    .max(150, { error: 'Age must be at most 150' }),
+  // A number, or a non-empty numeric string from a form. Empty, null or false are rejected rather than read as 0.
+  age: z
+    .union([z.number(), z.string().trim().min(1, { error: 'Age is required' })], { error: 'Age is required' })
+    .pipe(
+      z.coerce
+        .number<string | number>({ error: 'Age must be a number' })
+        .int({ error: 'Age must be a whole number' })
+        .min(0, { error: 'Age cannot be negative' })
+        .max(150, { error: 'Age must be at most 150' }),
+    ),
   gender: z.enum(GENDERS, { error: 'Gender must be Male, Female or Other' }),
   type: z.enum(PATIENT_TYPES, { error: 'Type must be OPD or IPD' }),
   phoneNumber: name('Phone number', 30),
   address: name('Address', 300),
-  admissionDate: z.coerce.date({ error: 'Admission date must be a valid date' }),
+  // A date or a non-empty date string; null, 0 or true are rejected rather than read as 1970-01-01.
+  admissionDate: z
+    .union([z.date(), z.string().trim().min(1, { error: 'Admission date is required' })], { error: 'Admission date is required' })
+    .pipe(z.coerce.date<string | Date>({ error: 'Admission date must be a valid date' })),
   status: z.enum(PATIENT_STATUSES, { error: 'Status must be Active or Discharged' }),
 };
 

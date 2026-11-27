@@ -23,8 +23,8 @@ declare module 'express-serve-static-core' {
  * so a client never mistakes an outage for being logged out.
  */
 export const authenticate: RequestHandler = async (req, _res, next) => {
-  const header = req.headers.authorization;
-  const token = header?.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : undefined;
+  // The scheme name is case-insensitive (RFC 9110).
+  const token = /^Bearer\s+(\S+)\s*$/i.exec(req.headers.authorization ?? '')?.[1];
   if (!token) throw new AppError(401, 'NO_TOKEN', 'No token provided');
 
   const payload = verifyToken(token);

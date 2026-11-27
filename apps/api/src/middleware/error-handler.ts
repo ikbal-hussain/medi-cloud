@@ -11,12 +11,13 @@ const send = (res: Response, status: number, body: ApiErrorBody) => res.status(s
 export function isDatabaseUnavailable(err: unknown): boolean {
   if (err instanceof Prisma.PrismaClientInitializationError) return true;
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    return ['P1001', 'P1002', 'P1008', 'P1017', 'P2024'].includes(err.code);
+    // P2037: PostgreSQL ran out of connections (SQLSTATE 53300); retrying shortly usually works.
+    return ['P1001', 'P1002', 'P1008', 'P1017', 'P2024', 'P2037'].includes(err.code);
   }
   // With the pg driver adapter, a refused or dropped connection surfaces as the driver's own error.
   if (!(err instanceof Error)) return false;
   const text = `${err.name} ${err.message} ${String((err as { code?: unknown }).code ?? '')} ${String(err.cause ?? '')}`;
-  return /ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|57P01|57P03|Connection terminated|timeout exceeded when trying to connect|DatabaseNotReachable/i.test(
+  return /ECONNREFUSED|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|57P01|57P03|Connection terminated|timeout exceeded when trying to connect|DatabaseNotReachable|too many (database )?connections|53300/i.test(
     text,
   );
 }
@@ -34,9 +35,18 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     const details = err.issues.map((i) => ({ path: i.path.join('.'), message: i.message }));
     return send(res, 400, { error: details[0]?.message ?? 'Invalid request', code: 'VALIDATION_ERROR', details });
   }
+  const log = req.log ?? logger;
   const type = (err as { type?: unknown } | null)?.type;
   if (type === 'entity.parse.failed') return send(res, 400, { error: 'Invalid JSON body', code: 'INVALID_JSON' });
-  if (type === 'entity.too.large') return send(res, 413, { error: 'Request body is too large', code: 'VALIDATION_ERROR' });
+
+  // Other client mistakes Express or body-parser already rejected with a 4xx (bad URL encoding, unsupported
+  // charset, body too large, aborted upload): keep their status, with a plain message.
+  const status = (err as { status?: unknown; statusCode?: unknown } | null)?.status ?? (err as { statusCode?: unknown } | null)?.statusCode;
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    log.warn({ err, path: req.path }, 'rejected request');
+    const message = { 413: 'Request body is too large', 415: 'Unsupported content type' }[status] ?? 'Bad request';
+    return send(res, status, { error: message, code: 'VALIDATION_ERROR' });
+  }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     // Races the route's own checks didn't catch, e.g. two sign-ups with the same email at once.
@@ -50,11 +60,11 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   }
 
   if (isDatabaseUnavailable(err)) {
-    logger.warn({ err, path: req.path }, 'database unavailable');
+    log.warn({ err, path: req.path }, 'database unavailable');
     return send(res, 503, { error: 'Database unavailable, try again shortly', code: 'SERVICE_UNAVAILABLE' });
   }
 
   // Anything else is a bug: log it in full, but never send internals to the client.
-  logger.error({ err, method: req.method, path: req.path }, 'unhandled error');
+  log.error({ err, method: req.method, path: req.path }, 'unhandled error');
   return send(res, 500, { error: 'Something went wrong', code: 'INTERNAL' });
 };

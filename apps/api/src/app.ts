@@ -19,6 +19,8 @@ export interface AppOptions {
   authRateLimit?: number;
   /** Overrides CORS_ORIGINS (tests). */
   corsOrigins?: string[];
+  /** Overrides TRUST_PROXY (tests). */
+  trustProxy?: number;
 }
 
 /**
@@ -35,13 +37,11 @@ export function originAllowed(patterns: string[], allowLocalhost: boolean) {
 export function createApp(options: AppOptions = {}) {
   const app = express();
   app.disable('x-powered-by');
-  // Behind one proxy (Vercel, Render, nginx): use its X-Forwarded-For for the client IP in rate limits.
-  app.set('trust proxy', 1);
+  // Only behind a known proxy may X-Forwarded-For give the client IP; otherwise a client could fake it to dodge rate limits.
+  const hops = options.trustProxy ?? env.TRUST_PROXY;
+  app.set('trust proxy', hops > 0 ? hops : false);
 
-  const allowed = originAllowed(options.corsOrigins ?? env.corsOrigins, !isDeployed);
-  app.use(helmet());
-  app.use(cors({ origin: (origin, done) => done(null, !origin || allowed(origin)) }));
-  app.use(express.json({ limit: '1mb' }));
+  // First, so every request gets a log line, even one that fails body parsing.
   // One line per request: method, URL, status and timing. No headers or bodies (patient data, tokens).
   app.use(
     pinoHttp({
@@ -53,6 +53,12 @@ export function createApp(options: AppOptions = {}) {
       },
     }),
   );
+
+  const allowed = originAllowed(options.corsOrigins ?? env.corsOrigins, !isDeployed);
+  app.use(helmet());
+  app.use(cors({ origin: (origin, done) => done(null, !origin || allowed(origin)) }));
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
   // Answers without the database, so it shows the server itself is up.
   app.get('/api/health', (_req, res) => {

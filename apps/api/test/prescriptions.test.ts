@@ -65,6 +65,10 @@ describe('prescriptions', () => {
     expect(ok.status).toBe(201);
     expect(ok.body.doctorName).toBe(city.doctor.name);
 
+    const asThemselves = await api().post('/api/prescriptions').set(as(root.id)).send({ ...rx(patient.id), tenantId: city.tenant.id });
+    expect(asThemselves.status).toBe(400);
+    expect(asThemselves.body.error).toMatch(/doctorId is required/);
+
     const notADoctor = await api()
       .post('/api/prescriptions')
       .set(as(root.id))

@@ -24,7 +24,7 @@ This is a monorepo: the React app is in `apps/web`, the API in `apps/api` (npm w
 
 ### Prerequisites
 
-- Node.js 20 or newer (22 recommended, see `.nvmrc`)
+- Node.js 22.9 or newer (see `.nvmrc`)
 - Docker (for PostgreSQL), or your own PostgreSQL 15+ and its URL in `apps/api/.env`
 
 ### Run it

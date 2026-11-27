@@ -28,10 +28,11 @@ All settings are environment variables, validated at startup (`src/config/env.ts
 |---|---|---|
 | `DATABASE_URL` | (required) | PostgreSQL connection string |
 | `JWT_SECRET` | dev-only fallback | **Required when deployed** (`NODE_ENV=production` or on Vercel) |
-| `JWT_EXPIRES_IN` | `7d` | Login token lifetime |
+| `JWT_EXPIRES_IN` | `7d` | Login token lifetime: whole seconds (`3600`) or a duration (`12h`, `7d`) |
 | `PORT` | `3000` | |
 | `CORS_ORIGINS` | `https://medi-cloud-app.netlify.app` | Comma-separated; `*` matches part of one host label, e.g. `https://deploy-preview-*--medi-cloud-app.netlify.app`. Any `http://localhost` port is allowed when not deployed. |
 | `AUTH_RATE_LIMIT` | `20` | Login/register attempts per IP per 15 minutes; `0` turns it off |
+| `TRUST_PROXY` | `1` on Vercel, else `0` | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
 | `LOG_LEVEL` | `info` | JSON logs (pino); one line per request, no headers or bodies |
 
 ## Scripts (`npm run <script> -w @medi-cloud/api`)
@@ -85,9 +86,9 @@ All under `/api`. Authenticated routes need `Authorization: Bearer <token>`.
 
 Request bodies are defined once in [`packages/shared/src/schemas.ts`](../../packages/shared/src/schemas.ts) and used by both the API and the web app.
 
-## Errors
+## Requests and errors
 
-Every error is JSON: `{ "error": "<message for people>", "code": "<stable code>", "details"?: [{ "path", "message" }] }`.
+Request bodies are JSON (form-encoded bodies are accepted too). Every error is JSON: `{ "error": "<message for people>", "code": "<stable code>", "details"?: [{ "path", "message" }] }`.
 
 | Status | `code` | When |
 |---|---|---|

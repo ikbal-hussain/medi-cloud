@@ -38,6 +38,23 @@ describe('shared schemas', () => {
     expect(patient.admissionDate).toBeInstanceOf(Date);
   });
 
+  it('rejects empty or null age and date instead of storing 0 or 1970', () => {
+    for (const age of ['', '  ', null, false, []]) expect(updatePatientSchema.safeParse({ age }).success, JSON.stringify(age)).toBe(false);
+    for (const admissionDate of ['', null, 0, true]) {
+      expect(updatePatientSchema.safeParse({ admissionDate }).success, JSON.stringify(admissionDate)).toBe(false);
+    }
+    expect(updatePatientSchema.parse({ age: 0 }).age).toBe(0);
+    expect(updatePatientSchema.parse({ age: '7' }).age).toBe(7);
+  });
+
+  it('caps new passwords at 72 bytes, what bcrypt actually uses', () => {
+    const base = { hospitalName: 'City', adminEmail: 'a@b.co', adminName: 'A' };
+    expect(registerSchema.safeParse({ ...base, password: 'x'.repeat(72) }).success).toBe(true);
+    expect(registerSchema.safeParse({ ...base, password: 'x'.repeat(73) }).success).toBe(false);
+    // 20 emoji = 80 bytes
+    expect(registerSchema.safeParse({ ...base, password: '🙂'.repeat(20) }).success).toBe(false);
+  });
+
   it('rejects impossible ages and unknown enums', () => {
     expect(updatePatientSchema.safeParse({ age: -1 }).success).toBe(false);
     expect(updatePatientSchema.safeParse({ age: 3.5 }).success).toBe(false);

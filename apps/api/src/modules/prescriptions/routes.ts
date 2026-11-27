@@ -60,9 +60,11 @@ prescriptionsRoutes.post('/', requireRole('DOCTOR', 'SUPER_ADMIN'), async (req, 
     : null;
   if (!patient) throw notFound('Patient');
 
-  // A SUPER_ADMIN may write on behalf of one of that hospital's doctors; everyone else writes as themselves.
+  // A SUPER_ADMIN writes on behalf of one of that hospital's doctors (never as themselves: they belong to no
+  // hospital); everyone else writes as themselves.
   let doctorId = user.id;
-  if (user.role === 'SUPER_ADMIN' && input.doctorId !== undefined) {
+  if (user.role === 'SUPER_ADMIN') {
+    if (input.doctorId === undefined) throw badRequest('doctorId is required: a super admin writes on behalf of a doctor');
     const doctor = isUuid(input.doctorId)
       ? await prisma.user.findFirst({ where: { id: input.doctorId, tenantId, role: 'DOCTOR' }, select: { id: true } })
       : null;
