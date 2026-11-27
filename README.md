@@ -45,7 +45,7 @@ npm run dev                             # API on http://localhost:3000, app on h
 ```bash
 echo "JWT_SECRET=$(openssl rand -hex 32)" > .env   # once
 docker compose up --build                           # app on http://localhost:8080 (WEB_PORT to change)
-docker compose exec api npm run seed                # optional demo data
+docker compose exec api npm run seed                # optional demo data (wipes that database)
 ```
 
 Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `doc123`, `nurse@city.com` / `nurse123`.
@@ -97,7 +97,7 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 | `npm run db:migrate` | Apply database migrations |
 | `npm run seed:demo` | Reset the local database and load demo data |
 | `npm test` | Unit and API tests (needs PostgreSQL running) |
-| `npm run test:e2e` | End-to-end tests in a real browser (Playwright); starts its own API and app |
+| `npm run test:e2e` | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
 | `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace |
 
 ---

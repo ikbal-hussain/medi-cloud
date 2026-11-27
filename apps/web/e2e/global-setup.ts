@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { E2E_DATABASE_URL } from '../playwright.config';
 
@@ -16,7 +17,9 @@ export default async function globalSetup() {
   } finally {
     await client.end();
   }
+  // The repo root, from this file's location: the runner's own working directory could be anywhere.
+  const root = fileURLToPath(new URL('../../..', import.meta.url));
   const env = { ...process.env, DATABASE_URL: E2E_DATABASE_URL };
-  execSync('npm run -s db:deploy -w @medi-cloud/api', { cwd: '../..', env, stdio: 'pipe' });
-  execSync('npm run -s seed -w @medi-cloud/api', { cwd: '../..', env, stdio: 'pipe' });
+  execSync('npm run -s db:deploy -w @medi-cloud/api', { cwd: root, env, stdio: 'pipe' });
+  execSync('npm run -s seed -w @medi-cloud/api', { cwd: root, env, stdio: 'pipe' });
 }

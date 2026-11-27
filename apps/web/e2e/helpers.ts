@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type APIRequestContext, type Page } from '@playwright/test';
 import { API_URL } from '../playwright.config';
 
 export const DEMO = {
@@ -10,11 +10,25 @@ export const DEMO = {
 
 export const unique = () => Date.now().toString(36).slice(-6);
 
+/** A session token for a demo user, straight from the API. */
+export async function tokenFor(request: APIRequestContext, who: { email: string; password: string }) {
+  const res = await request.post(`${API_URL}/auth/login`, { data: who });
+  expect(res.ok(), `login as ${who.email}`).toBeTruthy();
+  return ((await res.json()) as { token: string }).token;
+}
+
+/** Registers a patient through the API, so a test doesn't depend on another test having done it. */
+export async function createPatient(request: APIRequestContext, who: { email: string; password: string }, name: string) {
+  const res = await request.post(`${API_URL}/patients`, {
+    headers: { Authorization: `Bearer ${await tokenFor(request, who)}` },
+    data: { name, age: 40, gender: 'Female', type: 'IPD', phoneNumber: '555-0199', address: 'Ward 3', admissionDate: '2026-11-27' },
+  });
+  expect(res.ok(), 'create patient').toBeTruthy();
+}
+
 /** Logs in through the API and opens the app with that session (fast path for tests not about login). */
 export async function openAs(page: Page, who: { email: string; password: string }) {
-  const res = await page.request.post(`${API_URL}/auth/login`, { data: who });
-  expect(res.ok()).toBeTruthy();
-  const { token } = (await res.json()) as { token: string };
+  const token = await tokenFor(page.request, who);
   await page.addInitScript((t) => window.localStorage.setItem('auth_token', t), token);
   await page.goto('/');
   await expect(page.getByText(/Welcome back/)).toBeVisible();

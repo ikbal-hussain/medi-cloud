@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { collectAppErrors, DEMO } from './helpers';
+import { collectAppErrors, DEMO, tokenFor } from './helpers';
 
 test.describe('session', () => {
   test('a first visit makes no session call and logs no errors', async ({ page }) => {
@@ -51,8 +51,7 @@ test.describe('session', () => {
   });
 
   test('shows a retry screen while the server is unreachable, then recovers', async ({ page }) => {
-    const res = await page.request.post('http://localhost:3300/api/auth/login', { data: DEMO.admin });
-    const { token } = (await res.json()) as { token: string };
+    const token = await tokenFor(page.request, DEMO.admin);
     await page.addInitScript((t) => localStorage.setItem('auth_token', t), token);
     await page.route('**/api/auth/me', (r) => r.abort());
     await page.goto('/');

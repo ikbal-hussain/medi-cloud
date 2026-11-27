@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { DEMO, openAs, unique } from './helpers';
+import { API_URL } from '../playwright.config';
+import { createPatient, DEMO, openAs, tokenFor, unique } from './helpers';
 
+// Every test sets up its own data, so any one can run alone or be retried.
 test.describe('day-to-day flows', () => {
-  const patient = `Asha ${unique()}`;
-
   test('receptionist registers a patient', async ({ page }) => {
+    const patient = `Asha ${unique()}`;
     await openAs(page, DEMO.receptionist);
     await page.getByRole('button', { name: 'Patients' }).click();
     await page.getByRole('button', { name: /Add Patient/ }).click();
@@ -19,7 +20,9 @@ test.describe('day-to-day flows', () => {
     await expect(page.getByText(patient)).toBeVisible();
   });
 
-  test('doctor writes a prescription for them', async ({ page }) => {
+  test('doctor writes a prescription', async ({ page, request }) => {
+    const patient = `Bina ${unique()}`;
+    await createPatient(request, DEMO.receptionist, patient);
     await openAs(page, DEMO.doctor);
     await page.getByRole('button', { name: 'Prescriptions' }).click();
     await page.getByRole('button', { name: /New Prescription/ }).click();
@@ -62,10 +65,21 @@ test.describe('day-to-day flows', () => {
     await expect(page.getByText(email)).toBeVisible();
   });
 
-  test("another hospital sees none of it", async ({ page }) => {
+  test("another hospital sees none of it, in the API or the app", async ({ page, request }) => {
+    const patient = `Chandra ${unique()}`;
+    await createPatient(request, DEMO.receptionist, patient);
+
+    // The API itself must not return it: the app also filters by hospital, which would hide a leak.
+    const res = await request.get(`${API_URL}/patients`, {
+      headers: { Authorization: `Bearer ${await tokenFor(request, DEMO.otherAdmin)}` },
+    });
+    expect(res.ok()).toBeTruthy();
+    expect(JSON.stringify(await res.json())).not.toContain(patient);
+
     await openAs(page, DEMO.otherAdmin);
+    const loaded = page.waitForResponse((r) => r.url().endsWith('/api/patients') && r.request().method() === 'GET');
     await page.getByRole('button', { name: 'Patients' }).click();
-    await expect(page.getByRole('heading', { name: /Patient/ }).first()).toBeVisible();
+    await loaded;
     await expect(page.getByText(patient)).toHaveCount(0);
   });
 

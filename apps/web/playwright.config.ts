@@ -16,8 +16,8 @@ export default defineConfig({
   reporter: process.env['CI'] ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${WEB_PORT}`,
-    // Locally, use the installed Chrome; CI installs Playwright's Chromium.
-    channel: process.env['CI'] ? undefined : 'chrome',
+    // Playwright's own Chromium (`npx playwright install chromium`); PW_CHANNEL=chrome uses an installed Chrome instead.
+    channel: process.env['PW_CHANNEL'] || undefined,
     trace: 'retain-on-failure',
   },
   webServer: [
