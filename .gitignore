@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Secrets and local deploy links
+.env*
+!.env.example
+.vercel
+.netlify

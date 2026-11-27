@@ -1,6 +1,6 @@
-# 🏥 Medi Cloud Frontend
+# 🏥 Medi Cloud
 
-> Modern hospital management system frontend built with React, TypeScript, and Tailwind CSS.
+> Open-source, multi-tenant hospital management platform: React app and Express API in one repo.
 
 **🌐 Live Application:** [https://medi-cloud-app.netlify.app/](https://medi-cloud-app.netlify.app/)
 
@@ -20,46 +20,32 @@
 
 ## 🚀 Quick Start
 
+This is a monorepo: the React app is in `apps/web`, the API in `apps/api` (npm workspaces).
+
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- Node.js 20 or newer (22 recommended, see `.nvmrc`)
+- MongoDB running locally (`mongodb://localhost:27017`), or set `MONGODB_URI`
 
-### Installation
+### Run it
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd medi-cloud
-   ```
+```bash
+git clone https://github.com/ikbal-hussain/medi-cloud.git
+cd medi-cloud
+npm install
+npm run seed:demo   # optional: demo hospitals and users (wipes the database first)
+npm run dev         # API on http://localhost:3000, app on http://localhost:5173
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-   The application will open at `http://localhost:5173`
-
-4. **Build for production**
-   ```bash
-   npm run build
-   ```
+Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `doc123`, `nurse@city.com` / `nurse123`.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** React 18
-- **Language:** TypeScript
-- **Build Tool:** Vite
-- **Styling:** Tailwind CSS
-- **Icons:** Lucide React
-- **HTTP Client:** Fetch API
+- **Web:** React 18, TypeScript, Vite, Tailwind CSS, Lucide icons
+- **API:** Node.js, Express, MongoDB (Mongoose), JWT auth
+- **Tooling:** npm workspaces, ESLint, GitHub Actions CI
 
 ---
 
@@ -67,49 +53,35 @@
 
 ```
 medi-cloud/
-├── src/
-│   ├── components/          # React components
-│   │   ├── Dashboard.tsx
-│   │   ├── DashboardHome.tsx
-│   │   ├── LandingPage.tsx
-│   │   ├── LoginModal.tsx
-│   │   ├── RegisterModal.tsx
-│   │   ├── PatientManagement.tsx
-│   │   ├── PrescriptionManagement.tsx
-│   │   ├── UserManagement.tsx
-│   │   ├── Header.tsx
-│   │   └── Sidebar.tsx
-│   ├── utils/
-│   │   ├── api.ts           # API service
-│   │   └── auth.ts          # Authentication utilities
-│   ├── types/
-│   │   └── index.ts         # TypeScript types
-│   ├── App.tsx              # Main app component
-│   └── main.tsx             # Entry point
-├── public/                  # Static assets
-├── tailwind.config.js       # Tailwind configuration
-└── package.json
+├── apps/
+│   ├── web/        React app (Vite): src/components, src/utils/api.ts, src/types
+│   └── api/        Express API: src/routes, src/models, src/middleware (see apps/api/README.md)
+├── .github/workflows/ci.yml   lint, typecheck, build on every PR
+├── netlify.toml    web app deploy (Netlify builds apps/web)
+└── package.json    workspace root and shared scripts
 ```
 
 ---
 
 ## 🔌 API Integration
 
-The frontend calls the API at `VITE_API_URL`:
+The app calls the API at `VITE_API_URL`:
 - **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
 - **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify)
 
+API endpoints are documented in [apps/api/README.md](apps/api/README.md).
+
 ---
 
-## 📝 Available Scripts
+## 📝 Available Scripts (run from the repo root)
 
 | Script | Description |
 |--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run TypeScript type checking |
+| `npm run dev` | Start the API and the app together |
+| `npm run build` | Build every workspace |
+| `npm run lint` | Lint every workspace |
+| `npm run typecheck` | Type-check every workspace |
+| `npm run seed:demo` | Reset the database and load demo data |
 
 ---
 
@@ -121,12 +93,9 @@ The frontend calls the API at `VITE_API_URL`:
 
 ---
 
-## 🔗 Backend API
+## 🗺️ Roadmap
 
-This frontend requires the [Medi Cloud Backend](https://github.com/ikbal-hussain/medi-cloud-backend) API to be running.
-
-**Backend Repository:** [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend)  
-**Backend API:** `https://medi-cloud-backend.vercel.app/api` ([health check](https://medi-cloud-backend.vercel.app/api/health))
+Medi Cloud is becoming a fully open-source (MIT), self-hostable platform: TypeScript end to end on PostgreSQL, custom roles and permissions, email notifications, configurable AI assistants (Groq, Gemini, OpenRouter), appointments, billing, lab reports and a patient portal.
 
 ---
 ## 👤 Author

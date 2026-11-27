@@ -1,0 +1,14 @@
+# The web app lives in apps/web. Build from the repo root so npm installs every workspace.
+[build]
+  base = ""
+  command = "npm run build -w @medi-cloud/web"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Single-page app: let the client router handle every path.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
