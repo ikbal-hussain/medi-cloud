@@ -40,6 +40,14 @@ npm run seed:demo                       # optional: demo hospitals and users (wi
 npm run dev                             # API on http://localhost:3000, app on http://localhost:5173
 ```
 
+### Or run everything in Docker
+
+```bash
+echo "JWT_SECRET=$(openssl rand -hex 32)" > .env   # once
+docker compose up --build                           # app on http://localhost:8080 (WEB_PORT to change)
+docker compose exec api npm run seed                # optional demo data (wipes that database)
+```
+
 Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `doc123`, `nurse@city.com` / `nurse123`.
 
 ---
@@ -49,7 +57,7 @@ Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `
 - **Web:** React 18, TypeScript, Vite, Tailwind CSS, Lucide icons
 - **API:** TypeScript, Express 5, PostgreSQL, Prisma 7, zod, JWT, pino logs
 - **Shared:** one package of zod schemas, types and error codes used by both
-- **Tooling:** npm workspaces, ESLint, Vitest + Supertest (against real PostgreSQL), Docker Compose, GitHub Actions CI
+- **Tooling:** npm workspaces, ESLint, Vitest + Supertest (against real PostgreSQL), Playwright end-to-end tests, Docker, GitHub Actions CI, Dependabot
 
 ---
 
@@ -62,7 +70,7 @@ medi-cloud/
 │   └── api/        REST API: prisma/ (schema, migrations, seed), src/modules (see apps/api/README.md)
 ├── packages/
 │   └── shared/     zod schemas, response types, error codes, roles
-├── docker-compose.yml          PostgreSQL for local development
+├── docker-compose.yml          PostgreSQL for development, or the whole platform with `--build`
 ├── .github/workflows/ci.yml    lint, typecheck, migration check, tests, build on every PR
 ├── netlify.toml    web app deploy (Netlify builds apps/web)
 └── package.json    workspace root and shared scripts
@@ -88,7 +96,8 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 | `npm run db:up` | Start PostgreSQL in Docker |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run seed:demo` | Reset the local database and load demo data |
-| `npm test` | Run all tests (needs PostgreSQL running) |
+| `npm test` | Unit and API tests (needs PostgreSQL running) |
+| `npm run test:e2e` | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
 | `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace |
 
 ---

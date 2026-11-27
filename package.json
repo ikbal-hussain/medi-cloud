@@ -18,6 +18,7 @@
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e -w @medi-cloud/web",
     "db:up": "docker compose up -d --wait postgres",
     "db:migrate": "npm run db:migrate -w @medi-cloud/api",
     "seed:demo": "npm run seed -w @medi-cloud/api"

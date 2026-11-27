@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 // One lint config for the whole monorepo: shared TypeScript rules, then browser rules for the web app
 // and Node rules for the API, the shared package and config files.
 export default tseslint.config(
-  { ignores: ['**/dist', '**/node_modules', '**/coverage', 'apps/api/src/generated'] },
+  { ignores: ['**/dist', '**/node_modules', '**/coverage', 'apps/api/src/generated', '**/playwright-report', '**/test-results'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx,js,mjs}'],
@@ -17,7 +17,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
@@ -26,7 +26,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/api/**/*.{ts,js}', 'packages/**/*.ts', '*.{js,ts}', '**/*.config.{js,ts}'],
+    files: ['apps/api/**/*.{ts,js}', 'apps/web/e2e/**/*.ts', 'packages/**/*.ts', '*.{js,ts}', '**/*.config.{js,ts}'],
     languageOptions: { globals: globals.node },
   },
 );
