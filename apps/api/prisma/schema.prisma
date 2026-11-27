@@ -1,0 +1,109 @@
+// Medi Cloud database schema (PostgreSQL). Every hospital-owned row carries tenant_id.
+// Change it with `npm run db:migrate -w @medi-cloud/api`, which writes a migration in prisma/migrations.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  HOSPITAL_ADMIN
+  DOCTOR
+  RECEPTIONIST
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum PatientType {
+  OPD
+  IPD
+}
+
+enum PatientStatus {
+  Active
+  Discharged
+}
+
+/// A hospital. All its staff, patients and records belong to it and are invisible to other hospitals.
+model Tenant {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users         User[]
+  patients      Patient[]
+  prescriptions Prescription[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Stored lowercase; unique across the platform because login is by email alone.
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         Role
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  prescriptions Prescription[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Patient {
+  id            String        @id @default(uuid(7)) @db.Uuid
+  tenantId      String        @map("tenant_id") @db.Uuid
+  name          String
+  age           Int
+  gender        Gender
+  type          PatientType
+  phoneNumber   String        @map("phone_number")
+  address       String
+  admissionDate DateTime      @map("admission_date")
+  status        PatientStatus @default(Active)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  prescriptions Prescription[]
+
+  @@index([tenantId, createdAt])
+  @@map("patients")
+}
+
+model Prescription {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  patientId   String   @map("patient_id") @db.Uuid
+  doctorId    String   @map("doctor_id") @db.Uuid
+  medications String
+  diagnosis   String
+  notes       String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Medical records outlive edits to staff and patients: a patient or doctor with prescriptions can't be deleted.
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctor  User    @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, createdAt])
+  @@index([patientId])
+  @@index([doctorId])
+  @@map("prescriptions")
+}
