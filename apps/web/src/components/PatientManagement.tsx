@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, User, Phone, MapPin } from 'lucide-react';
 import { Patient } from '../types';
-import { patientsAPI } from '../utils/api';
+import { patientsAPI, errorMessage } from '../utils/api';
 
 interface PatientManagementProps {
   tenantId: string;
@@ -46,7 +46,7 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to add patient:', error);
-      alert('Failed to add patient. Please try again.');
+      alert(errorMessage(error, 'Failed to add patient. Please try again.'));
     }
   };
 

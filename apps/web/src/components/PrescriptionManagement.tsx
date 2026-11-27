@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, FileText, Calendar, User } from 'lucide-react';
 import { Prescription, Patient, UserRole } from '../types';
-import { prescriptionsAPI, patientsAPI, usersAPI } from '../utils/api';
+import { prescriptionsAPI, patientsAPI, usersAPI, errorMessage } from '../utils/api';
 
 interface PrescriptionManagementProps {
   tenantId: string;
@@ -40,7 +40,7 @@ export default function PrescriptionManagement({ tenantId, userId, userName, use
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to add prescription:', error);
-      alert('Failed to add prescription. Please try again.');
+      alert(errorMessage(error, 'Failed to add prescription. Please try again.'));
     }
   };
 
