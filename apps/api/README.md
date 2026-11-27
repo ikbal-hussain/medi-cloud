@@ -1,286 +1,121 @@
 # 🏥 Medi Cloud API
 
-> A RESTful API for the Medi Cloud hospital management platform: multi-tenant, JWT authentication, role-based access control.
+REST API for Medi Cloud: multi-tenant (one tenant per hospital), JWT authentication, role-based access.
+TypeScript, Express 5, PostgreSQL with Prisma 7, zod validation.
 
-> ⚠️ **Not deployed from here yet.** The live API below still deploys from the old [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend) repo. This folder is being rewritten in TypeScript on PostgreSQL; the live API moves here when that ships. Until then, a change in `apps/api` does not reach production.
+> ⚠️ **Not deployed from here yet.** The live API (`https://medi-cloud-backend.vercel.app/api`) still runs the old
+> MongoDB version from [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend). It moves to this
+> folder when the PostgreSQL deploy ships.
 
-**🌐 Live API:** `https://medi-cloud-backend.vercel.app/api` (on Vercel)
+## Run it locally
 
-**Health Check:** [https://medi-cloud-backend.vercel.app/api/health](https://medi-cloud-backend.vercel.app/api/health)
-
----
-
-## ✨ Features
-
-- 🔐 **JWT Authentication** - Secure token-based authentication
-- 👥 **Role-Based Access Control (RBAC)** - 4 distinct user roles with granular permissions
-- 🏢 **Multi-Tenant Architecture** - Complete data isolation per hospital
-- 📊 **MongoDB Database** - Scalable NoSQL data storage
-- 🛡️ **Secure Password Hashing** - Bcrypt encryption for passwords
-- 🚀 **RESTful API** - Clean and intuitive API endpoints
-
----
-
-## 🎭 User Roles
-
-| Role | Permissions |
-|------|-------------|
-| **SUPER_ADMIN** | Full system access across all tenants |
-| **HOSPITAL_ADMIN** | Manage users, patients, and view prescriptions within their hospital |
-| **DOCTOR** | Create and manage prescriptions, view patients |
-| **RECEPTIONIST** | Manage patients (add, update, delete) |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 20 or newer
-- MongoDB (local or cloud instance)
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ikbal-hussain/medi-cloud.git
-   cd medi-cloud/apps/api
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   
-   Create `apps/api/.env` (the API reads its `.env` from its own folder, not the repo root):
-   ```env
-   PORT=3000
-   MONGODB_URI=mongodb://localhost:27017/medi-cloud
-   JWT_SECRET=your-super-secret-jwt-key-change
-   NODE_ENV=development
-   ```
-
-   On Vercel, `MONGODB_URI` and `JWT_SECRET` must be set: there's no fallback for them once deployed. `CORS_ORIGINS` lists the app origins allowed to call the API (comma-separated; defaults to `https://medi-cloud-app.netlify.app`).
-
-4. **Initialize demo data (Optional)**
-   ```bash
-   npm run init:demo
-   ```
-   
-   This creates demo hospitals and users:
-   - **City Hospital Admin**: `admin@city.com` / `admin123`
-   - **City Hospital Doctor**: `doc@city.com` / `doc123`
-   - **City Hospital Receptionist**: `nurse@city.com` / `nurse123`
-   - **Galaxy Care Admin**: `admin@galaxy.com` / `admin123`
-
-5. **Start the server**
-   ```bash
-   # Development mode (with auto-reload)
-   npm run dev
-   
-   # Production mode
-   npm start
-   ```
-
-   The server will run on `http://localhost:3000`
-
----
-
-## 📚 API Documentation
-
-Base URL: `https://medi-cloud-backend.vercel.app` (Production; endpoints below include `/api`)  
-Local: `http://localhost:3000` (Development)
-
-### 🔑 Authentication Endpoints
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `POST` | `/api/auth/register` | Register new hospital | ❌ |
-| `POST` | `/api/auth/login` | Login user | ❌ |
-| `GET` | `/api/auth/me` | Get current user | ✅ |
-
-### 👥 User Management
-
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/users` | Get all users | HOSPITAL_ADMIN, SUPER_ADMIN |
-| `GET` | `/api/users/:id` | Get single user | HOSPITAL_ADMIN, SUPER_ADMIN |
-| `POST` | `/api/users` | Create user | HOSPITAL_ADMIN, SUPER_ADMIN |
-| `PUT` | `/api/users/:id` | Update user | HOSPITAL_ADMIN, SUPER_ADMIN |
-| `DELETE` | `/api/users/:id` | Delete user | HOSPITAL_ADMIN, SUPER_ADMIN |
-
-### 🏢 Tenant Management
-
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/tenants` | Get all tenants | SUPER_ADMIN |
-| `GET` | `/api/tenants/:id` | Get single tenant | SUPER_ADMIN |
-
-### 🏥 Patient Management
-
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/patients` | Get all patients | All authenticated users |
-| `GET` | `/api/patients/:id` | Get single patient | All authenticated users |
-| `POST` | `/api/patients` | Create patient | All authenticated users |
-| `PUT` | `/api/patients/:id` | Update patient | All authenticated users |
-| `DELETE` | `/api/patients/:id` | Delete patient | HOSPITAL_ADMIN, RECEPTIONIST |
-
-### 💊 Prescription Management
-
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/prescriptions` | Get all prescriptions | All authenticated users |
-| `GET` | `/api/prescriptions/:id` | Get single prescription | All authenticated users |
-| `POST` | `/api/prescriptions` | Create prescription | DOCTOR |
-| `PUT` | `/api/prescriptions/:id` | Update prescription | DOCTOR |
-| `DELETE` | `/api/prescriptions/:id` | Delete prescription | DOCTOR, HOSPITAL_ADMIN |
-
-### ❤️ Health Check
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/health` | Server health status | ❌ |
-
----
-
-## 🔒 Authentication
-
-All protected routes require a JWT token in the Authorization header:
-
-```http
-Authorization: Bearer <your-jwt-token>
-```
-
-### Example Request
+From the repo root (see the root README for the whole app):
 
 ```bash
-curl -X GET https://medi-cloud-backend.vercel.app/api/patients \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+npm install
+npm run db:up                           # PostgreSQL 17 in Docker on localhost:5432
+cp apps/api/.env.example apps/api/.env  # then adjust if needed
+npm run db:migrate                      # create the tables
+npm run seed:demo                       # optional: demo hospitals and users (wipes the local database)
+npm run dev -w @medi-cloud/api          # http://localhost:3000
 ```
 
----
+## Configuration
 
-## 📦 Tech Stack
+All settings are environment variables, validated at startup (`src/config/env.ts`); the API refuses to start with a clear message if one is wrong. See [.env.example](.env.example).
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB with Mongoose
-- **Authentication:** JWT (jsonwebtoken)
-- **Password Hashing:** bcryptjs
-- **Environment:** dotenv
+| Variable | Default | Notes |
+|---|---|---|
+| `DATABASE_URL` | (required) | PostgreSQL connection string |
+| `JWT_SECRET` | dev-only fallback | **Required when deployed** (`NODE_ENV=production` or on Vercel) |
+| `JWT_EXPIRES_IN` | `7d` | Login token lifetime: whole seconds (`3600`) or a duration (`12h`, `7d`) |
+| `PORT` | `3000` | |
+| `CORS_ORIGINS` | `https://medi-cloud-app.netlify.app` | Comma-separated; `*` matches part of one host label, e.g. `https://deploy-preview-*--medi-cloud-app.netlify.app`. Any `http://localhost` port is allowed when not deployed. |
+| `AUTH_RATE_LIMIT` | `20` | Login/register attempts per IP per 15 minutes; `0` turns it off |
+| `TRUST_PROXY` | `1` on Vercel, else `0` | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
+| `LOG_LEVEL` | `info` | JSON logs (pino); one line per request, no headers or bodies |
 
----
+## Scripts (`npm run <script> -w @medi-cloud/api`)
 
-## 🛠️ Available Scripts
+| Script | What it does |
+|---|---|
+| `dev` | Watch mode with `tsx` |
+| `build` / `start` | Bundle to `dist/` with tsup, then run it |
+| `test` | Vitest + Supertest against a real PostgreSQL test database (`TEST_DATABASE_URL`, default `medi_cloud_test` on the Docker one) |
+| `typecheck` | `tsc --noEmit` |
+| `db:migrate` | Apply migrations; after editing `prisma/schema.prisma`, also creates the new migration |
+| `db:deploy` | Apply migrations only (production) |
+| `db:check` | Fails if `schema.prisma` has changes no migration covers (runs in CI) |
+| `db:studio` | Browse the database |
+| `seed` | Demo data. Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
+| `create-super-admin` | Platform super admin from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (12+ characters; no default) |
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server with auto-reload |
-| `npm start` | Start production server |
-| `npm run init:admin` | Initialize SUPER_ADMIN user |
-| `npm run init:demo` | Initialize demo data with hospitals and users |
+## Roles
 
----
+| Role | Can |
+|---|---|
+| `SUPER_ADMIN` | Everything, in every hospital (`?tenantId=` to filter; `tenantId` in a body to act in one) |
+| `HOSPITAL_ADMIN` | Manage staff and patients; read and delete prescriptions, in their hospital |
+| `DOCTOR` | Add and edit patients; write prescriptions, and change or delete their own |
+| `RECEPTIONIST` | Manage patients (including delete); read prescriptions |
 
-## 📝 Example API Usage
+Every hospital's data is invisible to other hospitals: another hospital's record answers 404, as if it didn't exist.
 
-### Register a Hospital
+## Endpoints
 
-```bash
-curl -X POST https://medi-cloud-backend.vercel.app/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "hospitalName": "City Hospital",
-    "adminEmail": "admin@city.com",
-    "adminName": "Dr. John Doe",
-    "password": "securepassword123"
-  }'
-```
+All under `/api`. Authenticated routes need `Authorization: Bearer <token>`.
 
-### Login
+| Method | Path | Who |
+|---|---|---|
+| `GET` | `/health` | anyone: server up (no database) |
+| `GET` | `/health/db` | anyone: database reachable (503 if not) |
+| `POST` | `/auth/register` | anyone: new hospital + its first admin → `{ token, user, tenant }` |
+| `POST` | `/auth/login` | anyone → `{ token, user, tenant }` |
+| `GET` | `/auth/me` | any user → `{ user, tenant }` |
+| `GET` `POST` | `/users` | admins |
+| `GET` `PUT` `DELETE` | `/users/:id` | admins (a staff member with prescriptions can't be deleted) |
+| `GET` | `/tenants`, `/tenants/:id` | super admin |
+| `GET` `POST` | `/patients` | any user |
+| `GET` `PUT` | `/patients/:id` | any user |
+| `DELETE` | `/patients/:id` | admins, receptionists (not a patient with prescriptions: discharge instead) |
+| `GET` | `/prescriptions?patientId=&doctorId=` | any user; each includes `patientName` and `doctorName` |
+| `POST` | `/prescriptions` | doctors (and super admin, on behalf of a doctor) |
+| `GET` | `/prescriptions/:id` | any user |
+| `PUT` | `/prescriptions/:id` | the doctor who wrote it (and super admin) |
+| `DELETE` | `/prescriptions/:id` | the doctor who wrote it, admins |
 
-```bash
-curl -X POST https://medi-cloud-backend.vercel.app/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@city.com",
-    "password": "securepassword123"
-  }'
-```
+Request bodies are defined once in [`packages/shared/src/schemas.ts`](../../packages/shared/src/schemas.ts) and used by both the API and the web app.
 
-### Get Patients (Authenticated)
+## Requests and errors
 
-```bash
-curl -X GET https://medi-cloud-backend.vercel.app/api/patients \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
+Request bodies are JSON (form-encoded bodies are accepted too). Every error is JSON: `{ "error": "<message for people>", "code": "<stable code>", "details"?: [{ "path", "message" }] }`.
 
----
+| Status | `code` | When |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | A field is missing or invalid (`details` lists each) |
+| 400 | `INVALID_JSON` | The body isn't valid JSON |
+| 401 | `NO_TOKEN`, `INVALID_TOKEN`, `USER_NOT_FOUND` | The session is no good: log in again |
+| 401 | `INVALID_CREDENTIALS` | Wrong email or password (same answer for both) |
+| 403 | `FORBIDDEN` | The role can't do this |
+| 404 | `NOT_FOUND` | No such record in your hospital |
+| 409 | `EMAIL_TAKEN`, `CONFLICT` | Email in use; record still referenced |
+| 429 | `RATE_LIMITED` | Too many sign-in attempts |
+| 503 | `SERVICE_UNAVAILABLE` | Database unreachable: retry; the session is still valid |
+| 500 | `INTERNAL` | A bug; details are only in the server log |
 
-## 🏗️ Project Structure
+## Layout
 
 ```
 apps/api/
+├── prisma/            schema.prisma, migrations/, seed.ts
 ├── src/
-│   ├── config/
-│   │   └── database.js          # MongoDB connection
-│   ├── middleware/
-│   │   ├── auth.js              # Authentication middleware
-│   │   └── rbac.js              # Role-based access control
-│   ├── models/
-│   │   ├── User.js              # User model
-│   │   ├── Tenant.js            # Tenant (Hospital) model
-│   │   ├── Patient.js           # Patient model
-│   │   └── Prescription.js      # Prescription model
-│   ├── routes/
-│   │   ├── auth.js              # Authentication routes
-│   │   ├── users.js             # User routes
-│   │   ├── tenants.js           # Tenant routes
-│   │   ├── patients.js          # Patient routes
-│   │   └── prescriptions.js     # Prescription routes
-│   ├── scripts/
-│   │   ├── initSuperAdmin.js    # Initialize SUPER_ADMIN
-│   │   └── initDemoData.js      # Initialize demo data
-│   ├── utils/
-│   │   └── jwt.js               # JWT utilities
-│   ├── app.js                    # Express app (shared by server.js and Vercel)
-│   └── server.js                 # Local server
-├── api/index.js                  # Vercel entry point
-├── vercel.json                   # Vercel config
-├── .env                          # Environment variables
-├── package.json                  # Dependencies
-└── README.md                     # This file
+│   ├── app.ts         Express app: security headers, CORS, logging, rate limit, routes
+│   ├── server.ts      Long-running server (local, Docker)
+│   ├── vercel.ts      Vercel entry (api/index.js re-exports the built app)
+│   ├── config/env.ts  Validated settings
+│   ├── lib/           Prisma client, errors, JWT, passwords, tenancy rules, response mapping
+│   ├── middleware/    authenticate + requireRole, error handler
+│   └── modules/       auth, users, tenants, patients, prescriptions (one router each)
+├── scripts/           create-super-admin, local-database guard
+└── test/              API tests (one PostgreSQL database, wiped per test)
 ```
-
----
-
-## 🔐 Security Features
-
-- ✅ Password hashing with bcrypt
-- ✅ JWT token-based authentication
-- ✅ Role-based access control
-- ✅ Multi-tenant data isolation
-- ✅ CORS limited to the app's origins (`CORS_ORIGINS`)
-- ✅ Input validation and error handling
-
----
-
-## 👤 Author
-
-**Ikbal Hussain**
-
-- GitHub: [@ikbal-hussain](https://github.com/ikbal-hussain)
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
----
-
-**⭐ If you find this project helpful, please consider giving it a star!**

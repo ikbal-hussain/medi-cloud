@@ -1,23 +1,51 @@
 {
   "name": "@medi-cloud/api",
   "version": "0.1.0",
+  "private": true,
   "description": "Medi Cloud REST API",
+  "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
-    "init:admin": "node src/scripts/initSuperAdmin.js",
-    "init:demo": "node src/scripts/initDemoData.js",
-    "lint": "node scripts/check-syntax.js"
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "build": "prisma generate && tsup",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:check": "prisma migrate deploy && prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
+    "db:studio": "prisma studio",
+    "seed": "tsx --env-file-if-exists=.env prisma/seed.ts",
+    "create-super-admin": "tsx --env-file-if-exists=.env scripts/create-super-admin.ts"
   },
-  "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^8.0.3",
-    "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "@medi-cloud/shared": "*",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.6.7"
   },
-  "private": true
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.20.7",
+    "@types/supertest": "^7.2.1",
+    "dotenv": "^17.2.3",
+    "pg": "^8.23.1",
+    "prisma": "7.10.1",
+    "supertest": "^7.3.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.12"
+  }
 }

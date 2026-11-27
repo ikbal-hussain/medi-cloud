@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, UserCog, Mail, Shield } from 'lucide-react';
 import { User, UserRole } from '../types';
-import { usersAPI } from '../utils/api';
+import { usersAPI, errorMessage } from '../utils/api';
 
 // A new staff member: the user fields plus the initial password, which is never sent back by the API.
 type NewUser = Omit<User, 'id' | 'tenantId' | 'createdAt'> & { password: string };
@@ -36,7 +36,7 @@ export default function UserManagement({ tenantId, userRole }: UserManagementPro
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to add user:', error);
-      alert('Failed to add user. Please try again.');
+      alert(errorMessage(error, 'Failed to add user. Please try again.'));
     }
   };
 
@@ -154,8 +154,9 @@ function AddUserModal({ onClose, onAdd }: AddUserModalProps) {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              minLength={8}
+              placeholder="At least 8 characters"
               required
-              minLength={3}
             />
           </div>
 

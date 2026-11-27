@@ -1,4 +1,2 @@
-// Vercel entry: every request is rewritten here (vercel.json) and handled by the Express app.
-import app from '../src/app.js';
-
-export default app;
+// Vercel function. `npm run build` bundles the TypeScript app into dist/ first.
+export { default } from '../dist/vercel.js';
