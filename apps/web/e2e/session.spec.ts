@@ -15,7 +15,11 @@ test.describe('session', () => {
   test('logs in, keeps the session across a reload, and logs out', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /login/i }).first().click();
-    await page.getByRole('textbox', { name: /email/i }).or(page.locator('input[type=email]')).first().fill(DEMO.doctor.email);
+    await page
+      .getByRole('textbox', { name: /email/i })
+      .or(page.locator('input[type=email]'))
+      .first()
+      .fill(DEMO.doctor.email);
     await page.locator('input[type=password]').fill(DEMO.doctor.password);
     await page.getByRole('button', { name: 'Sign In' }).last().click();
     await expect(page.getByText('Welcome back, John')).toBeVisible();

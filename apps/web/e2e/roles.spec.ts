@@ -32,7 +32,9 @@ test.describe('what each role sees', () => {
   });
 
   test('one failing request shows "—" and a notice instead of zeros', async ({ page }) => {
-    await page.route('**/api/prescriptions', (r) => r.fulfill({ status: 500, json: { error: 'boom', code: 'INTERNAL' } }));
+    await page.route('**/api/prescriptions', (r) =>
+      r.fulfill({ status: 500, json: { error: 'boom', code: 'INTERNAL' } }),
+    );
     await openAs(page, DEMO.admin);
     expect(await stat(page, 'Prescriptions')).toBe('—');
     expect(Number(await stat(page, 'Total Patients'))).toBeGreaterThanOrEqual(3);

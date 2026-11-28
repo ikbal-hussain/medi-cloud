@@ -12,7 +12,9 @@ export const patientsRoutes = Router();
 patientsRoutes.use(authenticate);
 
 async function findInScope(req: Request) {
-  const patient = await prisma.patient.findFirst({ where: { id: parseId(req.params['id'], 'Patient'), ...tenantScope(req) } });
+  const patient = await prisma.patient.findFirst({
+    where: { id: parseId(req.params['id'], 'Patient'), ...tenantScope(req) },
+  });
   if (!patient) throw notFound('Patient');
   return patient;
 }

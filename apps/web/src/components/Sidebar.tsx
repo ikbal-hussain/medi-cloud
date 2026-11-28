@@ -37,9 +37,7 @@ export default function Sidebar({ userRole, currentPage, onPageChange }: Sidebar
               key={item.id}
               onClick={() => onPageChange(item.id)}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-700 hover:bg-gray-50'
+                isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               <Icon className="h-5 w-5" />

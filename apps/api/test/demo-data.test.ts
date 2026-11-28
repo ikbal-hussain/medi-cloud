@@ -9,8 +9,8 @@ const login = (email: string, password: string) => api().post('/api/auth/login')
 const untouched = async (other: Awaited<ReturnType<typeof hospital>>, patientId: string) =>
   Boolean(
     (await prisma.tenant.findUnique({ where: { id: other.tenant.id } })) &&
-      (await prisma.user.findUnique({ where: { id: other.admin.id } })) &&
-      (await prisma.patient.findUnique({ where: { id: patientId } })),
+    (await prisma.user.findUnique({ where: { id: other.admin.id } })) &&
+    (await prisma.patient.findUnique({ where: { id: patientId } })),
   );
 
 // The live demo is reset with this, so it must never lock out the platform's super admin.
@@ -30,13 +30,22 @@ describe('demo data', () => {
       expect((await login(s.email, s.password)).status, s.email).toBe(200);
     }
     const rx = await prisma.prescription.findFirstOrThrow({ include: { patient: true, doctor: true } });
-    expect([rx.patient.name, rx.doctor.email, rx.diagnosis]).toEqual(['Robert Johnson', 'doc@city.com', 'Acute Bronchitis']);
+    expect([rx.patient.name, rx.doctor.email, rx.diagnosis]).toEqual([
+      'Robert Johnson',
+      'doc@city.com',
+      'Acute Bronchitis',
+    ]);
   });
 
   it('gives the same result when run again', async () => {
     await superAdmin();
     await loadDemoData(prisma);
-    const count = async () => [await prisma.tenant.count(), await prisma.user.count(), await prisma.patient.count(), await prisma.prescription.count()];
+    const count = async () => [
+      await prisma.tenant.count(),
+      await prisma.user.count(),
+      await prisma.patient.count(),
+      await prisma.prescription.count(),
+    ];
     const first = await count();
     await loadDemoData(prisma);
     expect(await count()).toEqual(first);
@@ -56,7 +65,9 @@ describe('demo data', () => {
   it('rolls back every delete if loading fails part-way', async () => {
     const other = await hospital('Other');
     const patient = await createPatient(other.tenant.id);
-    const broken = [{ ...DEMO_HOSPITALS[0]!, prescriptions: [{ ...DEMO_HOSPITALS[0]!.prescriptions[0]!, patient: 'Nobody' }] }];
+    const broken = [
+      { ...DEMO_HOSPITALS[0]!, prescriptions: [{ ...DEMO_HOSPITALS[0]!.prescriptions[0]!, patient: 'Nobody' }] },
+    ];
 
     await expect(loadDemoData(prisma, broken)).rejects.toThrow(/unknown patient "Nobody"/);
     expect(await untouched(other, patient.id)).toBe(true);

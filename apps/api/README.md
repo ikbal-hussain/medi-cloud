@@ -22,31 +22,31 @@ npm run dev -w @medi-cloud/api          # http://localhost:3000
 
 All settings are environment variables, validated at startup (`src/config/env.ts`); the API refuses to start with a clear message if one is wrong. See [.env.example](.env.example).
 
-| Variable | Default | Notes |
-|---|---|---|
-| `DATABASE_URL` | (required) | PostgreSQL connection string |
-| `JWT_SECRET` | dev-only fallback | **Required when deployed** (`NODE_ENV=production` or on Vercel) |
-| `JWT_EXPIRES_IN` | `7d` | Login token lifetime: whole seconds (`3600`) or a duration (`12h`, `7d`) |
-| `PORT` | `3000` | |
-| `CORS_ORIGINS` | `https://medi-cloud-app.netlify.app` | Comma-separated; `*` matches part of one host label, e.g. `https://deploy-preview-*--medi-cloud-app.netlify.app`. Any `http://localhost` port is allowed when not deployed. |
-| `AUTH_RATE_LIMIT` | `20` | Login/register attempts per IP per 15 minutes; `0` turns it off |
-| `TRUST_PROXY` | `1` on Vercel, else `0` | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
-| `LOG_LEVEL` | `info` | JSON logs (pino); one line per request, no headers or bodies |
+| Variable          | Default                              | Notes                                                                                                                                                                                                                   |
+| ----------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`    | (required)                           | PostgreSQL connection string                                                                                                                                                                                            |
+| `JWT_SECRET`      | dev-only fallback                    | **Required when deployed** (`NODE_ENV=production` or on Vercel)                                                                                                                                                         |
+| `JWT_EXPIRES_IN`  | `7d`                                 | Login token lifetime: whole seconds (`3600`) or a duration (`12h`, `7d`)                                                                                                                                                |
+| `PORT`            | `3000`                               |                                                                                                                                                                                                                         |
+| `CORS_ORIGINS`    | `https://medi-cloud-app.netlify.app` | Comma-separated; `*` matches part of one host label, e.g. `https://deploy-preview-*--medi-cloud-app.netlify.app`. Any `http://localhost` port is allowed when not deployed.                                             |
+| `AUTH_RATE_LIMIT` | `20`                                 | Login/register attempts per IP per 15 minutes; `0` turns it off                                                                                                                                                         |
+| `TRUST_PROXY`     | `1` on Vercel, else `0`              | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
+| `LOG_LEVEL`       | `info`                               | JSON logs (pino); one line per request, no headers or bodies                                                                                                                                                            |
 
 ## Scripts (`npm run <script> -w @medi-cloud/api`)
 
-| Script | What it does |
-|---|---|
-| `dev` | Watch mode with `tsx` |
-| `build` / `start` | Bundle to `dist/` with tsup, then run it |
-| `test` | Vitest + Supertest against a real PostgreSQL test database (`TEST_DATABASE_URL`, default `medi_cloud_test` on the Docker one) |
-| `typecheck` | `tsc --noEmit` |
-| `db:migrate` | Apply migrations; after editing `prisma/schema.prisma`, also creates the new migration |
-| `db:deploy` | Apply migrations only (production) |
-| `db:check` | Fails if `schema.prisma` has changes no migration covers (runs in CI) |
-| `db:studio` | Browse the database |
-| `seed` | Replaces all hospitals, staff and patients with demo data (super admins are kept). Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
-| `create-super-admin` | Platform super admin from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (12+ characters; no default) |
+| Script               | What it does                                                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev`                | Watch mode with `tsx`                                                                                                                         |
+| `build` / `start`    | Bundle to `dist/` with tsup, then run it                                                                                                      |
+| `test`               | Vitest + Supertest against a real PostgreSQL test database (`TEST_DATABASE_URL`, default `medi_cloud_test` on the Docker one)                 |
+| `typecheck`          | `tsc --noEmit`                                                                                                                                |
+| `db:migrate`         | Apply migrations; after editing `prisma/schema.prisma`, also creates the new migration                                                        |
+| `db:deploy`          | Apply migrations only (production)                                                                                                            |
+| `db:check`           | Fails if `schema.prisma` has changes no migration covers (runs in CI)                                                                         |
+| `db:studio`          | Browse the database                                                                                                                           |
+| `seed`               | Replaces all hospitals, staff and patients with demo data (super admins are kept). Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
+| `create-super-admin` | Platform super admin from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (12+ characters; no default)                                           |
 
 ## Deploying (Vercel + Neon)
 
@@ -64,12 +64,12 @@ Any other host works the same way: `npm run build && npm start` with `DATABASE_U
 
 ## Roles
 
-| Role | Can |
-|---|---|
-| `SUPER_ADMIN` | Everything, in every hospital (`?tenantId=` to filter; `tenantId` in a body to act in one) |
-| `HOSPITAL_ADMIN` | Manage staff and patients; read and delete prescriptions, in their hospital |
-| `DOCTOR` | Add and edit patients; write prescriptions, and change or delete their own |
-| `RECEPTIONIST` | Manage patients (including delete); read prescriptions |
+| Role             | Can                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| `SUPER_ADMIN`    | Everything, in every hospital (`?tenantId=` to filter; `tenantId` in a body to act in one) |
+| `HOSPITAL_ADMIN` | Manage staff and patients; read and delete prescriptions, in their hospital                |
+| `DOCTOR`         | Add and edit patients; write prescriptions, and change or delete their own                 |
+| `RECEPTIONIST`   | Manage patients (including delete); read prescriptions                                     |
 
 Every hospital's data is invisible to other hospitals: another hospital's record answers 404, as if it didn't exist.
 
@@ -77,24 +77,24 @@ Every hospital's data is invisible to other hospitals: another hospital's record
 
 All under `/api`. Authenticated routes need `Authorization: Bearer <token>`.
 
-| Method | Path | Who |
-|---|---|---|
-| `GET` | `/health` | anyone: server up (no database) |
-| `GET` | `/health/db` | anyone: database reachable (503 if not) |
-| `POST` | `/auth/register` | anyone: new hospital + its first admin → `{ token, user, tenant }` |
-| `POST` | `/auth/login` | anyone → `{ token, user, tenant }` |
-| `GET` | `/auth/me` | any user → `{ user, tenant }` |
-| `GET` `POST` | `/users` | admins |
-| `GET` `PUT` `DELETE` | `/users/:id` | admins (a staff member with prescriptions can't be deleted) |
-| `GET` | `/tenants`, `/tenants/:id` | super admin |
-| `GET` `POST` | `/patients` | any user |
-| `GET` `PUT` | `/patients/:id` | any user |
-| `DELETE` | `/patients/:id` | admins, receptionists (not a patient with prescriptions: discharge instead) |
-| `GET` | `/prescriptions?patientId=&doctorId=` | any user; each includes `patientName` and `doctorName` |
-| `POST` | `/prescriptions` | doctors (and super admin, on behalf of a doctor) |
-| `GET` | `/prescriptions/:id` | any user |
-| `PUT` | `/prescriptions/:id` | the doctor who wrote it (and super admin) |
-| `DELETE` | `/prescriptions/:id` | the doctor who wrote it, admins |
+| Method               | Path                                  | Who                                                                         |
+| -------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
+| `GET`                | `/health`                             | anyone: server up (no database)                                             |
+| `GET`                | `/health/db`                          | anyone: database reachable (503 if not)                                     |
+| `POST`               | `/auth/register`                      | anyone: new hospital + its first admin → `{ token, user, tenant }`          |
+| `POST`               | `/auth/login`                         | anyone → `{ token, user, tenant }`                                          |
+| `GET`                | `/auth/me`                            | any user → `{ user, tenant }`                                               |
+| `GET` `POST`         | `/users`                              | admins                                                                      |
+| `GET` `PUT` `DELETE` | `/users/:id`                          | admins (a staff member with prescriptions can't be deleted)                 |
+| `GET`                | `/tenants`, `/tenants/:id`            | super admin                                                                 |
+| `GET` `POST`         | `/patients`                           | any user                                                                    |
+| `GET` `PUT`          | `/patients/:id`                       | any user                                                                    |
+| `DELETE`             | `/patients/:id`                       | admins, receptionists (not a patient with prescriptions: discharge instead) |
+| `GET`                | `/prescriptions?patientId=&doctorId=` | any user; each includes `patientName` and `doctorName`                      |
+| `POST`               | `/prescriptions`                      | doctors (and super admin, on behalf of a doctor)                            |
+| `GET`                | `/prescriptions/:id`                  | any user                                                                    |
+| `PUT`                | `/prescriptions/:id`                  | the doctor who wrote it (and super admin)                                   |
+| `DELETE`             | `/prescriptions/:id`                  | the doctor who wrote it, admins                                             |
 
 Request bodies are defined once in [`packages/shared/src/schemas.ts`](../../packages/shared/src/schemas.ts) and used by both the API and the web app.
 
@@ -102,18 +102,18 @@ Request bodies are defined once in [`packages/shared/src/schemas.ts`](../../pack
 
 Request bodies are JSON (form-encoded bodies are accepted too). Every error is JSON: `{ "error": "<message for people>", "code": "<stable code>", "details"?: [{ "path", "message" }] }`.
 
-| Status | `code` | When |
-|---|---|---|
-| 400 | `VALIDATION_ERROR` | A field is missing or invalid (`details` lists each) |
-| 400 | `INVALID_JSON` | The body isn't valid JSON |
-| 401 | `NO_TOKEN`, `INVALID_TOKEN`, `USER_NOT_FOUND` | The session is no good: log in again |
-| 401 | `INVALID_CREDENTIALS` | Wrong email or password (same answer for both) |
-| 403 | `FORBIDDEN` | The role can't do this |
-| 404 | `NOT_FOUND` | No such record in your hospital |
-| 409 | `EMAIL_TAKEN`, `CONFLICT` | Email in use; record still referenced |
-| 429 | `RATE_LIMITED` | Too many sign-in attempts |
-| 503 | `SERVICE_UNAVAILABLE` | Database unreachable: retry; the session is still valid |
-| 500 | `INTERNAL` | A bug; details are only in the server log |
+| Status | `code`                                        | When                                                    |
+| ------ | --------------------------------------------- | ------------------------------------------------------- |
+| 400    | `VALIDATION_ERROR`                            | A field is missing or invalid (`details` lists each)    |
+| 400    | `INVALID_JSON`                                | The body isn't valid JSON                               |
+| 401    | `NO_TOKEN`, `INVALID_TOKEN`, `USER_NOT_FOUND` | The session is no good: log in again                    |
+| 401    | `INVALID_CREDENTIALS`                         | Wrong email or password (same answer for both)          |
+| 403    | `FORBIDDEN`                                   | The role can't do this                                  |
+| 404    | `NOT_FOUND`                                   | No such record in your hospital                         |
+| 409    | `EMAIL_TAKEN`, `CONFLICT`                     | Email in use; record still referenced                   |
+| 429    | `RATE_LIMITED`                                | Too many sign-in attempts                               |
+| 503    | `SERVICE_UNAVAILABLE`                         | Database unreachable: retry; the session is still valid |
+| 500    | `INTERNAL`                                    | A bug; details are only in the server log               |
 
 ## Layout
 

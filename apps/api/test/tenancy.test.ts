@@ -45,7 +45,10 @@ describe('tenant isolation', () => {
   it('refuses to create records in another hospital or to filter by it', async () => {
     const city = await hospital('City');
     const galaxy = await hospital('Galaxy');
-    const create = await api().post('/api/patients').set(as(galaxy.admin.id)).send(patientInput({ tenantId: city.tenant.id }));
+    const create = await api()
+      .post('/api/patients')
+      .set(as(galaxy.admin.id))
+      .send(patientInput({ tenantId: city.tenant.id }));
     expect(create.status).toBe(403);
     const list = await api().get(`/api/patients?tenantId=${city.tenant.id}`).set(as(galaxy.admin.id));
     expect(list.status).toBe(403);
@@ -63,10 +66,16 @@ describe('tenant isolation', () => {
     expect(filtered.body.map((p: { name: string }) => p.name)).toEqual(['In City']);
     expect((await api().get('/api/tenants').set(as(root.id))).body).toHaveLength(3);
 
-    const created = await api().post('/api/patients').set(as(root.id)).send(patientInput({ tenantId: galaxy.tenant.id }));
+    const created = await api()
+      .post('/api/patients')
+      .set(as(root.id))
+      .send(patientInput({ tenantId: galaxy.tenant.id }));
     expect(created.status).toBe(201);
     expect(created.body.tenantId).toBe(galaxy.tenant.id);
-    const unknown = await api().post('/api/patients').set(as(root.id)).send(patientInput({ tenantId: '0195f000-0000-7000-8000-000000000000' }));
+    const unknown = await api()
+      .post('/api/patients')
+      .set(as(root.id))
+      .send(patientInput({ tenantId: '0195f000-0000-7000-8000-000000000000' }));
     expect(unknown.status).toBe(404);
   });
 

@@ -15,10 +15,19 @@ async function main() {
   const kept = await loadDemoData(prisma);
 
   const logins = DEMO_HOSPITALS.map((h) =>
-    h.staff.map((s, i) => `  ${(i === 0 ? h.name : '').padEnd(15)} ${`${s.email} / ${s.password}`.padEnd(28)} (${s.role.toLowerCase().replaceAll('_', ' ')})`).join('\n'),
+    h.staff
+      .map(
+        (s, i) =>
+          `  ${(i === 0 ? h.name : '').padEnd(15)} ${`${s.email} / ${s.password}`.padEnd(28)} (${s.role.toLowerCase().replaceAll('_', ' ')})`,
+      )
+      .join('\n'),
   ).join('\n');
   console.log(`Demo data loaded into ${redact(env.DATABASE_URL)}\n\n${logins}\n`);
-  console.log(kept.length ? `Kept ${kept.length} super admin(s): ${kept.join(', ')}` : 'No super admin yet: create one with `npm run create-super-admin`.');
+  console.log(
+    kept.length
+      ? `Kept ${kept.length} super admin(s): ${kept.join(', ')}`
+      : 'No super admin yet: create one with `npm run create-super-admin`.',
+  );
 }
 
 main()

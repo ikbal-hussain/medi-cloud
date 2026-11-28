@@ -38,7 +38,13 @@ usersRoutes.post('/', async (req, res) => {
   if (await prisma.user.findUnique({ where: { email: input.email }, select: { id: true } })) throw emailTaken();
 
   const user = await prisma.user.create({
-    data: { tenantId, email: input.email, name: input.name, role: input.role, passwordHash: await hashPassword(input.password) },
+    data: {
+      tenantId,
+      email: input.email,
+      name: input.name,
+      role: input.role,
+      passwordHash: await hashPassword(input.password),
+    },
   });
   res.status(201).json(toUserDto(user) satisfies UserDto);
 });

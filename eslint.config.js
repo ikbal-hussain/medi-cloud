@@ -9,7 +9,16 @@ import tseslint from 'typescript-eslint';
 // and Node rules for the API, the shared package and config files. Formatting is Prettier's job: the last
 // entry turns off every ESLint rule that would disagree with it.
 export default tseslint.config(
-  { ignores: ['**/dist', '**/node_modules', '**/coverage', 'apps/api/src/generated', '**/playwright-report', '**/test-results'] },
+  {
+    ignores: [
+      '**/dist',
+      '**/node_modules',
+      '**/coverage',
+      'apps/api/src/generated',
+      '**/playwright-report',
+      '**/test-results',
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx,js,mjs}'],

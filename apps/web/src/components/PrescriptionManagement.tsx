@@ -33,7 +33,9 @@ export default function PrescriptionManagement({ tenantId, userId, userName, use
     }
   };
 
-  const handleAddPrescription = async (newPrescription: Omit<Prescription, 'id' | 'tenantId' | 'createdAt' | 'doctorId'>) => {
+  const handleAddPrescription = async (
+    newPrescription: Omit<Prescription, 'id' | 'tenantId' | 'createdAt' | 'doctorId'>,
+  ) => {
     try {
       await prescriptionsAPI.create(newPrescription);
       await loadData();
@@ -223,9 +225,7 @@ function AddPrescriptionModal({ patients, onClose, onAdd }: AddPrescriptionModal
               placeholder="List medications with dosage and frequency..."
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Example: Amoxicillin 500mg - 3 times daily for 7 days
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Example: Amoxicillin 500mg - 3 times daily for 7 days</p>
           </div>
 
           <div>

@@ -61,7 +61,8 @@ export function loadEnv(source: NodeJS.ProcessEnv): Env {
   }
   const value = parsed.data;
   // Deployed, a missing JWT_SECRET stops the server: the dev fallback is public, so tokens signed with it could be forged.
-  if (!value.JWT_SECRET && isDeployed) throw new Error('Invalid API configuration:\n  JWT_SECRET: required when deployed');
+  if (!value.JWT_SECRET && isDeployed)
+    throw new Error('Invalid API configuration:\n  JWT_SECRET: required when deployed');
   return {
     ...value,
     JWT_SECRET: value.JWT_SECRET ?? DEV_JWT_SECRET,

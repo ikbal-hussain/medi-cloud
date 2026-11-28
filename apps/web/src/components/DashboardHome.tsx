@@ -49,7 +49,8 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
         activePatients: active?.length ?? null,
         opdPatients: active?.filter((p) => p.type === 'OPD').length ?? null,
         ipdPatients: active?.filter((p) => p.type === 'IPD').length ?? null,
-        totalStaff: users.status === 'fulfilled' ? users.value.filter((u) => u.tenantId === user.tenantId).length : null,
+        totalStaff:
+          users.status === 'fulfilled' ? users.value.filter((u) => u.tenantId === user.tenantId).length : null,
         totalPrescriptions:
           prescriptions.status === 'fulfilled'
             ? prescriptions.value.filter((p) => p.tenantId === user.tenantId).length
@@ -89,7 +90,9 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
         </div>
       )}
 
-      <div className={`grid grid-cols-1 md:grid-cols-2 ${canSeeStaff ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8`}>
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 ${canSeeStaff ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8`}
+      >
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div>
@@ -151,10 +154,7 @@ export default function DashboardHome({ user, tenant }: DashboardHomeProps) {
                 <span className="text-sm font-bold text-blue-600">{show(stats.opdPatients)}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${share(stats.opdPatients)}%` }}
-                ></div>
+                <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${share(stats.opdPatients)}%` }}></div>
               </div>
             </div>
             <div>

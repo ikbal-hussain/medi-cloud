@@ -33,7 +33,11 @@ const name = (label: string, max = 120) =>
     .min(1, { error: `${label} is required` })
     .max(max, { error: `${label} must be at most ${max} characters` });
 
-const id = (label: string) => z.string({ error: `${label} is required` }).trim().min(1, { error: `${label} is required` });
+const id = (label: string) =>
+  z
+    .string({ error: `${label} is required` })
+    .trim()
+    .min(1, { error: `${label} is required` });
 
 export const loginSchema = z.object({
   email,
@@ -80,7 +84,9 @@ const patientFields = {
   address: name('Address', 300),
   // A date or a non-empty date string; null, 0 or true are rejected rather than read as 1970-01-01.
   admissionDate: z
-    .union([z.date(), z.string().trim().min(1, { error: 'Admission date is required' })], { error: 'Admission date is required' })
+    .union([z.date(), z.string().trim().min(1, { error: 'Admission date is required' })], {
+      error: 'Admission date is required',
+    })
     .pipe(z.coerce.date<string | Date>({ error: 'Admission date must be a valid date' })),
   status: z.enum(PATIENT_STATUSES, { error: 'Status must be Active or Discharged' }),
 };

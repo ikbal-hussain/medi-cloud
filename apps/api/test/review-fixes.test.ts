@@ -42,7 +42,10 @@ describe('requests and errors', () => {
   });
 
   it('treats "too many connections" (P2037) as a retryable outage', () => {
-    const err = new Prisma.PrismaClientKnownRequestError('Too many database connections opened', { code: 'P2037', clientVersion: '7' });
+    const err = new Prisma.PrismaClientKnownRequestError('Too many database connections opened', {
+      code: 'P2037',
+      clientVersion: '7',
+    });
     expect(isDatabaseUnavailable(err)).toBe(true);
   });
 
@@ -61,11 +64,13 @@ describe('requests and errors', () => {
   it("can't dodge the sign-in limit by faking X-Forwarded-For when no proxy is trusted", async () => {
     const direct = api({ authRateLimit: 2, trustProxy: 0 });
     const body = { email: 'nobody@x.test', password: 'whatever' };
-    for (const ip of ['1.1.1.1', '2.2.2.2']) expect((await direct.post('/api/auth/login').set('X-Forwarded-For', ip).send(body)).status).toBe(401);
+    for (const ip of ['1.1.1.1', '2.2.2.2'])
+      expect((await direct.post('/api/auth/login').set('X-Forwarded-For', ip).send(body)).status).toBe(401);
     expect((await direct.post('/api/auth/login').set('X-Forwarded-For', '3.3.3.3').send(body)).status).toBe(429);
 
     // Behind a trusted proxy, the forwarded address is the client's, so each client has its own limit.
     const proxied = api({ authRateLimit: 2, trustProxy: 1 });
-    for (const ip of ['1.1.1.1', '2.2.2.2', '3.3.3.3']) expect((await proxied.post('/api/auth/login').set('X-Forwarded-For', ip).send(body)).status).toBe(401);
+    for (const ip of ['1.1.1.1', '2.2.2.2', '3.3.3.3'])
+      expect((await proxied.post('/api/auth/login').set('X-Forwarded-For', ip).send(body)).status).toBe(401);
   });
 });

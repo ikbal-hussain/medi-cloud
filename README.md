@@ -81,6 +81,7 @@ medi-cloud/
 ## 🔌 API Integration
 
 The app calls the API at `VITE_API_URL`:
+
 - **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
 - **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify): this repo's `apps/api` on Vercel, with Neon PostgreSQL
 
@@ -90,15 +91,15 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 
 ## 📝 Available Scripts (run from the repo root)
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start the API and the app together |
-| `npm run db:up` | Start PostgreSQL in Docker |
-| `npm run db:migrate` | Apply database migrations |
-| `npm run seed:demo` | Replace all hospitals, staff and patients in the local database with demo data (super admins are kept) |
-| `npm test` | Unit and API tests (needs PostgreSQL running) |
-| `npm run test:e2e` | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
-| `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace |
+| Script                                 | Description                                                                                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                          | Start the API and the app together                                                                                                                                                          |
+| `npm run db:up`                        | Start PostgreSQL in Docker                                                                                                                                                                  |
+| `npm run db:migrate`                   | Apply database migrations                                                                                                                                                                   |
+| `npm run seed:demo`                    | Replace all hospitals, staff and patients in the local database with demo data (super admins are kept)                                                                                      |
+| `npm test`                             | Unit and API tests (needs PostgreSQL running)                                                                                                                                               |
+| `npm run test:e2e`                     | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
+| `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace                                                                                                                                            |
 
 ---
 
@@ -115,6 +116,7 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 Medi Cloud is becoming a fully open-source (MIT), self-hostable platform: TypeScript end to end on PostgreSQL, custom roles and permissions, email notifications, configurable AI assistants (Groq, Gemini, OpenRouter), appointments, billing, lab reports and a patient portal.
 
 ---
+
 ## 👤 Author
 
 **Ikbal Hussain**
@@ -124,4 +126,3 @@ Medi Cloud is becoming a fully open-source (MIT), self-hostable platform: TypeSc
 ---
 
 **⭐ If you find this project helpful, please consider giving it a star!**
-

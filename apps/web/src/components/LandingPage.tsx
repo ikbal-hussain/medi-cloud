@@ -47,8 +47,8 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
             <span className="block text-primary-600 mt-2">Made Simple</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Streamline your hospital operations with our comprehensive SaaS platform.
-            Manage patients, staff, prescriptions, and more—all in one place.
+            Streamline your hospital operations with our comprehensive SaaS platform. Manage patients, staff,
+            prescriptions, and more—all in one place.
           </p>
           <div className="mt-8 flex justify-center space-x-4">
             <button
@@ -99,9 +99,7 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
         </div>
 
         <div className="mt-20 bg-white rounded-xl shadow-md p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Everything Your Hospital Needs
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Everything Your Hospital Needs</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center mt-1">

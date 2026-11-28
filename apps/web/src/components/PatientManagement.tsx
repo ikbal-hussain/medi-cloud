@@ -29,8 +29,8 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
   };
 
   const filteredPatients = patients.filter((patient) => {
-    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phoneNumber.includes(searchTerm);
+    const matchesSearch =
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) || patient.phoneNumber.includes(searchTerm);
     const matchesType = filterType === 'ALL' || patient.type === filterType;
     const matchesStatus = filterStatus === 'ALL' || patient.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -125,18 +125,14 @@ export default function PatientManagement({ tenantId }: PatientManagementProps) 
               <div className="flex flex-col items-end space-y-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    patient.type === 'OPD'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-primary-100 text-primary-700'
+                    patient.type === 'OPD' ? 'bg-blue-100 text-blue-700' : 'bg-primary-100 text-primary-700'
                   }`}
                 >
                   {patient.type}
                 </span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    patient.status === 'Active'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-700'
+                    patient.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                   }`}
                 >
                   {patient.status}

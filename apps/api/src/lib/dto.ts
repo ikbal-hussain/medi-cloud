@@ -14,7 +14,13 @@ export const toUserDto = (u: User): UserDto => ({
   createdAt: u.createdAt.toISOString(),
 });
 
-export const toSessionUser = (u: User) => ({ id: u.id, email: u.email, name: u.name, role: u.role, tenantId: u.tenantId });
+export const toSessionUser = (u: User) => ({
+  id: u.id,
+  email: u.email,
+  name: u.name,
+  role: u.role,
+  tenantId: u.tenantId,
+});
 
 export const toPatientDto = (p: Patient): PatientDto => ({
   id: p.id,

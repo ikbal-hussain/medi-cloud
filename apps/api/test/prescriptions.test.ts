@@ -10,7 +10,12 @@ describe('prescriptions', () => {
     const patient = await createPatient(city.tenant.id, 'Robert Johnson');
     const res = await api().post('/api/prescriptions').set(as(city.doctor.id)).send(rx(patient.id));
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ patientName: 'Robert Johnson', doctorName: city.doctor.name, doctorId: city.doctor.id, notes: '' });
+    expect(res.body).toMatchObject({
+      patientName: 'Robert Johnson',
+      doctorName: city.doctor.name,
+      doctorId: city.doctor.id,
+      notes: '',
+    });
 
     const list = await api().get('/api/prescriptions').set(as(city.receptionist.id));
     expect(list.body).toHaveLength(1);
@@ -36,10 +41,16 @@ describe('prescriptions', () => {
     expect((await api().get('/api/prescriptions?doctorId=not-a-uuid').set(as(city.doctor.id))).body).toEqual([]);
   });
 
-  it("a doctor may change or delete only their own; an admin may delete any", async () => {
+  it('a doctor may change or delete only their own; an admin may delete any', async () => {
     const city = await hospital('City');
     const colleague = await prisma.user.create({
-      data: { tenantId: city.tenant.id, email: 'colleague@city.test', name: 'Dr. Colleague', role: 'DOCTOR', passwordHash: 'x' },
+      data: {
+        tenantId: city.tenant.id,
+        email: 'colleague@city.test',
+        name: 'Dr. Colleague',
+        role: 'DOCTOR',
+        passwordHash: 'x',
+      },
     });
     const patient = await createPatient(city.tenant.id);
     const theirs = await createPrescription(city.tenant.id, patient.id, colleague.id);
@@ -49,7 +60,10 @@ describe('prescriptions', () => {
     expect(edit.body.error).toBe('You can only update your own prescriptions');
     expect((await api().delete(`/api/prescriptions/${theirs.id}`).set(as(city.doctor.id))).status).toBe(403);
 
-    const own = await api().put(`/api/prescriptions/${theirs.id}`).set(as(colleague.id)).send({ notes: 'Review in 7 days' });
+    const own = await api()
+      .put(`/api/prescriptions/${theirs.id}`)
+      .set(as(colleague.id))
+      .send({ notes: 'Review in 7 days' });
     expect(own.body.notes).toBe('Review in 7 days');
     expect((await api().delete(`/api/prescriptions/${theirs.id}`).set(as(city.admin.id))).status).toBe(200);
   });
@@ -65,7 +79,10 @@ describe('prescriptions', () => {
     expect(ok.status).toBe(201);
     expect(ok.body.doctorName).toBe(city.doctor.name);
 
-    const asThemselves = await api().post('/api/prescriptions').set(as(root.id)).send({ ...rx(patient.id), tenantId: city.tenant.id });
+    const asThemselves = await api()
+      .post('/api/prescriptions')
+      .set(as(root.id))
+      .send({ ...rx(patient.id), tenantId: city.tenant.id });
     expect(asThemselves.status).toBe(400);
     expect(asThemselves.body.error).toMatch(/doctorId is required/);
 

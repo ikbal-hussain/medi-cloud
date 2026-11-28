@@ -18,10 +18,22 @@ export async function tokenFor(request: APIRequestContext, who: { email: string;
 }
 
 /** Registers a patient through the API, so a test doesn't depend on another test having done it. */
-export async function createPatient(request: APIRequestContext, who: { email: string; password: string }, name: string) {
+export async function createPatient(
+  request: APIRequestContext,
+  who: { email: string; password: string },
+  name: string,
+) {
   const res = await request.post(`${API_URL}/patients`, {
     headers: { Authorization: `Bearer ${await tokenFor(request, who)}` },
-    data: { name, age: 40, gender: 'Female', type: 'IPD', phoneNumber: '555-0199', address: 'Ward 3', admissionDate: '2026-11-27' },
+    data: {
+      name,
+      age: 40,
+      gender: 'Female',
+      type: 'IPD',
+      phoneNumber: '555-0199',
+      address: 'Ward 3',
+      admissionDate: '2026-11-27',
+    },
   });
   expect(res.ok(), 'create patient').toBeTruthy();
 }
@@ -45,6 +57,9 @@ export function collectAppErrors(page: Page) {
 
 /** The number shown on a dashboard stat card. */
 export async function stat(page: Page, label: string) {
-  const card = page.locator('div.rounded-xl').filter({ has: page.getByText(label, { exact: true }) }).first();
+  const card = page
+    .locator('div.rounded-xl')
+    .filter({ has: page.getByText(label, { exact: true }) })
+    .first();
   return (await card.locator('p.text-3xl').innerText()).trim();
 }

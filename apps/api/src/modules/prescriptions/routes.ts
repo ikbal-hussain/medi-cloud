@@ -18,7 +18,10 @@ prescriptionsRoutes.use(authenticate);
 
 async function findInScope(req: Request) {
   const id = parseId(req.params['id'], 'Prescription');
-  const prescription = await prisma.prescription.findFirst({ where: { id, ...tenantScope(req) }, include: prescriptionNames });
+  const prescription = await prisma.prescription.findFirst({
+    where: { id, ...tenantScope(req) },
+    include: prescriptionNames,
+  });
   if (!prescription) throw notFound('Prescription');
   return prescription;
 }
@@ -64,7 +67,8 @@ prescriptionsRoutes.post('/', requireRole('DOCTOR', 'SUPER_ADMIN'), async (req, 
   // hospital); everyone else writes as themselves.
   let doctorId = user.id;
   if (user.role === 'SUPER_ADMIN') {
-    if (input.doctorId === undefined) throw badRequest('doctorId is required: a super admin writes on behalf of a doctor');
+    if (input.doctorId === undefined)
+      throw badRequest('doctorId is required: a super admin writes on behalf of a doctor');
     const doctor = isUuid(input.doctorId)
       ? await prisma.user.findFirst({ where: { id: input.doctorId, tenantId, role: 'DOCTOR' }, select: { id: true } })
       : null;
@@ -73,7 +77,14 @@ prescriptionsRoutes.post('/', requireRole('DOCTOR', 'SUPER_ADMIN'), async (req, 
   }
 
   const prescription = await prisma.prescription.create({
-    data: { tenantId, patientId: patient.id, doctorId, medications: input.medications, diagnosis: input.diagnosis, notes: input.notes },
+    data: {
+      tenantId,
+      patientId: patient.id,
+      doctorId,
+      medications: input.medications,
+      diagnosis: input.diagnosis,
+      notes: input.notes,
+    },
     include: prescriptionNames,
   });
   res.status(201).json(toPrescriptionDto(prescription) satisfies PrescriptionDto);
@@ -83,7 +94,11 @@ prescriptionsRoutes.put('/:id', requireRole('DOCTOR', 'SUPER_ADMIN'), async (req
   const input = updatePrescriptionSchema.parse(req.body);
   const prescription = await findInScope(req);
   assertOwnIfDoctor(req, prescription.doctorId, 'update');
-  const updated = await prisma.prescription.update({ where: { id: prescription.id }, data: input, include: prescriptionNames });
+  const updated = await prisma.prescription.update({
+    where: { id: prescription.id },
+    data: input,
+    include: prescriptionNames,
+  });
   res.json(toPrescriptionDto(updated) satisfies PrescriptionDto);
 });
 

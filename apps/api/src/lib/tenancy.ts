@@ -27,7 +27,8 @@ export async function tenantForCreate(req: Request, requested: string | undefine
   const { user } = getAuth(req);
   if (requested === undefined || requested === user.tenantId) return user.tenantId;
   if (user.role !== 'SUPER_ADMIN') throw denied();
-  const exists = isUuid(requested) && (await prisma.tenant.findUnique({ where: { id: requested }, select: { id: true } }));
+  const exists =
+    isUuid(requested) && (await prisma.tenant.findUnique({ where: { id: requested }, select: { id: true } }));
   if (!exists) throw notFound('Hospital');
   return requested;
 }
