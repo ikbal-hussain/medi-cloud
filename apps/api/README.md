@@ -3,9 +3,7 @@
 REST API for Medi Cloud: multi-tenant (one tenant per hospital), JWT authentication, role-based access.
 TypeScript, Express 5, PostgreSQL with Prisma 7, zod validation.
 
-> ⚠️ **Not deployed from here yet.** The live API (`https://medi-cloud-backend.vercel.app/api`) still runs the old
-> MongoDB version from [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend). It moves to this
-> folder when the PostgreSQL deploy ships.
+Live at `https://medi-cloud-backend.vercel.app/api` (see [Deploying](#deploying-vercel--neon)).
 
 ## Run it locally
 
@@ -16,7 +14,7 @@ npm install
 npm run db:up                           # PostgreSQL 17 in Docker on localhost:5432
 cp apps/api/.env.example apps/api/.env  # then adjust if needed
 npm run db:migrate                      # create the tables
-npm run seed:demo                       # optional: demo hospitals and users (wipes the local database)
+npm run seed:demo                       # optional: demo hospitals and users (replaces all hospitals; keeps super admins)
 npm run dev -w @medi-cloud/api          # http://localhost:3000
 ```
 
@@ -47,8 +45,22 @@ All settings are environment variables, validated at startup (`src/config/env.ts
 | `db:deploy` | Apply migrations only (production) |
 | `db:check` | Fails if `schema.prisma` has changes no migration covers (runs in CI) |
 | `db:studio` | Browse the database |
-| `seed` | Demo data. Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
+| `seed` | Replaces all hospitals, staff and patients with demo data (super admins are kept). Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
 | `create-super-admin` | Platform super admin from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (12+ characters; no default) |
+
+## Deploying (Vercel + Neon)
+
+The live API is the Vercel project `medi-cloud-backend`, built from this folder (Root Directory `apps/api`). Every push to `main` deploys it.
+
+- **Region:** Singapore (`sin1` in [vercel.json](vercel.json)), next to its Neon PostgreSQL. Each request makes several database queries, so the API and the database share a region.
+- **Settings:** `JWT_SECRET` and `CORS_ORIGINS` are set on the project. The Neon integration adds `DATABASE_URL` (pooled, used by the API) and `DATABASE_URL_UNPOOLED` (a direct connection).
+- **Keep the database variables on Production only.** Preview deployments run unreviewed PR code (Dependabot's included) and must never reach the live database. Previews therefore have no database: they prove the build, nothing more.
+- **Migrations run on each production deploy**, after a successful build ([scripts/vercel-build.sh](scripts/vercel-build.sh)). They use `DATABASE_URL_UNPOOLED`, because the pooled connection can't hold the lock migrations take, and the build fails if it's missing. Preview deployments skip them, and the build log says so.
+- **Keep every migration backward-compatible.** Migrations run before Vercel switches traffic to the new deployment, and Vercel doesn't wait for CI, so the old code briefly runs on the new schema. Add a column first and drop the old one in a later release, never in the same one. If a migration fails, later deploys stop with `P3009` until it is fixed and marked with `prisma migrate resolve`.
+- **Demo data:** `ALLOW_DEMO_RESET=yes DATABASE_URL=… npm run seed -w @medi-cloud/api` replaces every hospital, staff member and patient with the demo set, in one transaction. Super admins are kept, and writes made during the reset wait for it to finish.
+- **First super admin:** `DATABASE_URL=… SUPER_ADMIN_EMAIL=… SUPER_ADMIN_PASSWORD=… npm run create-super-admin -w @medi-cloud/api`. Keep it private: it can see, change and delete every hospital's staff, patients and prescriptions.
+
+Any other host works the same way: `npm run build && npm start` with `DATABASE_URL` and `JWT_SECRET` set, after `npm run db:deploy`.
 
 ## Roles
 

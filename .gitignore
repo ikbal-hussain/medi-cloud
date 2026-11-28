@@ -31,3 +31,6 @@ dist-ssr
 # Playwright
 test-results
 playwright-report
+
+# Empty static-output folder made by apps/api/scripts/vercel-build.sh
+apps/api/public/

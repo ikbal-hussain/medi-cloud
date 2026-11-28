@@ -36,7 +36,7 @@ npm install
 npm run db:up                           # PostgreSQL in Docker
 cp apps/api/.env.example apps/api/.env
 npm run db:migrate                      # create the tables
-npm run seed:demo                       # optional: demo hospitals and users (wipes the local database)
+npm run seed:demo                       # optional: demo hospitals and users (replaces all hospitals; keeps super admins)
 npm run dev                             # API on http://localhost:3000, app on http://localhost:5173
 ```
 
@@ -45,7 +45,7 @@ npm run dev                             # API on http://localhost:3000, app on h
 ```bash
 echo "JWT_SECRET=$(openssl rand -hex 32)" > .env   # once
 docker compose up --build                           # app on http://localhost:8080 (WEB_PORT to change)
-docker compose exec api npm run seed                # optional demo data (wipes that database)
+docker compose exec api npm run seed                # optional demo data (replaces all hospitals; keeps super admins)
 ```
 
 Demo logins after `seed:demo`: `admin@city.com` / `admin123`, `doc@city.com` / `doc123`, `nurse@city.com` / `nurse123`.
@@ -82,7 +82,7 @@ medi-cloud/
 
 The app calls the API at `VITE_API_URL`:
 - **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
-- **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify; still the old MongoDB API until the PostgreSQL deploy ships)
+- **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify): this repo's `apps/api` on Vercel, with Neon PostgreSQL
 
 API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 
@@ -95,7 +95,7 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 | `npm run dev` | Start the API and the app together |
 | `npm run db:up` | Start PostgreSQL in Docker |
 | `npm run db:migrate` | Apply database migrations |
-| `npm run seed:demo` | Reset the local database and load demo data |
+| `npm run seed:demo` | Replace all hospitals, staff and patients in the local database with demo data (super admins are kept) |
 | `npm test` | Unit and API tests (needs PostgreSQL running) |
 | `npm run test:e2e` | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
 | `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace |
