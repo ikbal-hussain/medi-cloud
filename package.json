@@ -16,21 +16,35 @@
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @medi-cloud/api\" \"npm run dev -w @medi-cloud/web\"",
     "build": "npm run build --workspaces --if-present",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e -w @medi-cloud/web",
     "db:up": "docker compose up -d --wait postgres",
     "db:migrate": "npm run db:migrate -w @medi-cloud/api",
-    "seed:demo": "npm run seed -w @medi-cloud/api"
+    "seed:demo": "npm run seed -w @medi-cloud/api",
+    "prepare": "node -e \"import('husky').then((h) => { const m = h.default(); if (m) console.log(m); }, () => {})\""
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "concurrently": "^9.1.0",
     "eslint": "^9.9.1",
+    "eslint-config-prettier": "^10.1.9",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.10.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.3.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html,yml,yaml}": "prettier --write"
   }
 }

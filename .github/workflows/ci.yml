@@ -36,6 +36,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - name: Formatting (run `npm run format` to fix)
+        run: npm run format:check
       - run: npm run typecheck
       - name: Migrations match the Prisma schema
         run: npm run db:check -w @medi-cloud/api
