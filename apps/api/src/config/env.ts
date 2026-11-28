@@ -41,6 +41,8 @@ const schema = z.object({
   /** Proxies in front of the API whose X-Forwarded-For to trust for the client IP (rate limits). 0 = none.
    *  Defaults to 1 on Vercel; set it when running behind nginx or a load balancer. */
   TRUST_PROXY: z.coerce.number().int().min(0).optional(),
+  /** Serve the interactive API docs at /api/docs and the OpenAPI document at /api/openapi.json. */
+  API_DOCS: z.stringbool().default(true),
 });
 
 export type Env = Omit<z.infer<typeof schema>, 'JWT_SECRET' | 'LOG_LEVEL' | 'TRUST_PROXY'> & {

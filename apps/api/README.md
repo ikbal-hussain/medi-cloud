@@ -5,6 +5,8 @@ TypeScript, Express 5, PostgreSQL with Prisma 7, zod validation.
 
 Live at `https://medi-cloud-backend.vercel.app/api` (see [Deploying](#deploying-vercel--neon)).
 
+**📖 Interactive API docs: [medi-cloud-backend.vercel.app/api/docs](https://medi-cloud-backend.vercel.app/api/docs)** (locally: http://localhost:3000/api/docs). Every endpoint, its roles, request and response shapes, with a "try it" button. They are generated from the same zod schemas the API validates with, and the tests fail if a route is undocumented, or if any operation's success response doesn't match its documented status and shape. The raw OpenAPI 3.1 document is at `/api/openapi.json`, ready for Postman, Insomnia or client generators.
+
 ## Run it locally
 
 From the repo root (see the root README for the whole app):
@@ -32,6 +34,7 @@ All settings are environment variables, validated at startup (`src/config/env.ts
 | `AUTH_RATE_LIMIT` | `20`                                 | Login/register attempts per IP per 15 minutes; `0` turns it off                                                                                                                                                         |
 | `TRUST_PROXY`     | `1` on Vercel, else `0`              | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
 | `LOG_LEVEL`       | `info`                               | JSON logs (pino); one line per request, no headers or bodies                                                                                                                                                            |
+| `API_DOCS`        | `true`                               | Serve the interactive API docs at `/api/docs` and the OpenAPI document at `/api/openapi.json`                                                                                                                           |
 
 ## Scripts (`npm run <script> -w @medi-cloud/api`)
 
@@ -64,12 +67,12 @@ Any other host works the same way: `npm run build && npm start` with `DATABASE_U
 
 ## Roles
 
-| Role             | Can                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| `SUPER_ADMIN`    | Everything, in every hospital (`?tenantId=` to filter; `tenantId` in a body to act in one) |
-| `HOSPITAL_ADMIN` | Manage staff and patients; read and delete prescriptions, in their hospital                |
-| `DOCTOR`         | Add and edit patients; write prescriptions, and change or delete their own                 |
-| `RECEPTIONIST`   | Manage patients (including delete); read prescriptions                                     |
+| Role             | Can                                                                                                                               |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `SUPER_ADMIN`    | Everything, in every hospital (`?tenantId=` to filter; creating staff, patients or prescriptions requires `tenantId` in the body) |
+| `HOSPITAL_ADMIN` | Manage staff and patients; read and delete prescriptions, in their hospital                                                       |
+| `DOCTOR`         | Add and edit patients; write prescriptions, and change or delete their own                                                        |
+| `RECEPTIONIST`   | Manage patients (including delete); read prescriptions                                                                            |
 
 Every hospital's data is invisible to other hospitals: another hospital's record answers 404, as if it didn't exist.
 
@@ -77,24 +80,25 @@ Every hospital's data is invisible to other hospitals: another hospital's record
 
 All under `/api`. Authenticated routes need `Authorization: Bearer <token>`.
 
-| Method               | Path                                  | Who                                                                         |
-| -------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
-| `GET`                | `/health`                             | anyone: server up (no database)                                             |
-| `GET`                | `/health/db`                          | anyone: database reachable (503 if not)                                     |
-| `POST`               | `/auth/register`                      | anyone: new hospital + its first admin → `{ token, user, tenant }`          |
-| `POST`               | `/auth/login`                         | anyone → `{ token, user, tenant }`                                          |
-| `GET`                | `/auth/me`                            | any user → `{ user, tenant }`                                               |
-| `GET` `POST`         | `/users`                              | admins                                                                      |
-| `GET` `PUT` `DELETE` | `/users/:id`                          | admins (a staff member with prescriptions can't be deleted)                 |
-| `GET`                | `/tenants`, `/tenants/:id`            | super admin                                                                 |
-| `GET` `POST`         | `/patients`                           | any user                                                                    |
-| `GET` `PUT`          | `/patients/:id`                       | any user                                                                    |
-| `DELETE`             | `/patients/:id`                       | admins, receptionists (not a patient with prescriptions: discharge instead) |
-| `GET`                | `/prescriptions?patientId=&doctorId=` | any user; each includes `patientName` and `doctorName`                      |
-| `POST`               | `/prescriptions`                      | doctors (and super admin, on behalf of a doctor)                            |
-| `GET`                | `/prescriptions/:id`                  | any user                                                                    |
-| `PUT`                | `/prescriptions/:id`                  | the doctor who wrote it (and super admin)                                   |
-| `DELETE`             | `/prescriptions/:id`                  | the doctor who wrote it, admins                                             |
+| Method               | Path                                  | Who                                                                                   |
+| -------------------- | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| `GET`                | `/health`                             | anyone: server up (no database)                                                       |
+| `GET`                | `/health/db`                          | anyone: database reachable (503 if not)                                               |
+| `GET`                | `/docs`, `/openapi.json`              | anyone: interactive API docs and the OpenAPI 3.1 document (off with `API_DOCS=false`) |
+| `POST`               | `/auth/register`                      | anyone: new hospital + its first admin → `{ token, user, tenant }`                    |
+| `POST`               | `/auth/login`                         | anyone → `{ token, user, tenant }`                                                    |
+| `GET`                | `/auth/me`                            | any user → `{ user, tenant }`                                                         |
+| `GET` `POST`         | `/users`                              | admins                                                                                |
+| `GET` `PUT` `DELETE` | `/users/:id`                          | admins (a staff member with prescriptions can't be deleted)                           |
+| `GET`                | `/tenants`, `/tenants/:id`            | super admin                                                                           |
+| `GET` `POST`         | `/patients`                           | any user                                                                              |
+| `GET` `PUT`          | `/patients/:id`                       | any user                                                                              |
+| `DELETE`             | `/patients/:id`                       | admins, receptionists (not a patient with prescriptions: discharge instead)           |
+| `GET`                | `/prescriptions?patientId=&doctorId=` | any user; each includes `patientName` and `doctorName`                                |
+| `POST`               | `/prescriptions`                      | doctors (and super admin, on behalf of a doctor)                                      |
+| `GET`                | `/prescriptions/:id`                  | any user                                                                              |
+| `PUT`                | `/prescriptions/:id`                  | the doctor who wrote it (and super admin)                                             |
+| `DELETE`             | `/prescriptions/:id`                  | the doctor who wrote it, admins                                                       |
 
 Request bodies are defined once in [`packages/shared/src/schemas.ts`](../../packages/shared/src/schemas.ts) and used by both the API and the web app.
 
@@ -127,7 +131,7 @@ apps/api/
 │   ├── config/env.ts  Validated settings
 │   ├── lib/           Prisma client, errors, JWT, passwords, tenancy rules, response mapping
 │   ├── middleware/    authenticate + requireRole, error handler
-│   └── modules/       auth, users, tenants, patients, prescriptions (one router each)
+│   └── modules/       auth, users, tenants, patients, prescriptions, health, docs (one router each)
 ├── scripts/           create-super-admin, local-database guard
 └── test/              API tests (one PostgreSQL database, wiped per test)
 ```

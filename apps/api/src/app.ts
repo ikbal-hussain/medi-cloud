@@ -1,14 +1,15 @@
 import cors from 'cors';
-import express, { type RequestHandler } from 'express';
+import express, { type RequestHandler, type Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import type { ApiErrorBody } from '@medi-cloud/shared';
 import { env, isDeployed } from './config/env';
 import { logger } from './lib/logger';
-import { prisma } from './lib/prisma';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { authRoutes } from './modules/auth/routes';
+import { docsRoutes } from './modules/docs/routes';
+import { healthRoutes } from './modules/health/routes';
 import { patientsRoutes } from './modules/patients/routes';
 import { prescriptionsRoutes } from './modules/prescriptions/routes';
 import { tenantsRoutes } from './modules/tenants/routes';
@@ -21,6 +22,20 @@ export interface AppOptions {
   corsOrigins?: string[];
   /** Overrides TRUST_PROXY (tests). */
   trustProxy?: number;
+  /** Overrides API_DOCS (tests). */
+  apiDocs?: boolean;
+}
+
+/** Every API router and where it is mounted. A test checks that the API docs list exactly these routes. */
+export function apiRouters(limitAttempts: RequestHandler): [path: string, router: Router][] {
+  return [
+    ['/api/health', healthRoutes],
+    ['/api/auth', authRoutes(limitAttempts)],
+    ['/api/users', usersRoutes],
+    ['/api/tenants', tenantsRoutes],
+    ['/api/patients', patientsRoutes],
+    ['/api/prescriptions', prescriptionsRoutes],
+  ];
 }
 
 /**
@@ -61,16 +76,6 @@ export function createApp(options: AppOptions = {}) {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
-  // Answers without the database, so it shows the server itself is up.
-  app.get('/api/health', (_req, res) => {
-    res.json({ status: 'OK', message: 'Server is running' });
-  });
-  // Also checks the database (503 when it's unreachable).
-  app.get('/api/health/db', async (_req, res) => {
-    await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: 'OK', database: 'up' });
-  });
-
   const attempts = options.authRateLimit ?? env.AUTH_RATE_LIMIT;
   const limitAttempts: RequestHandler =
     attempts > 0
@@ -86,11 +91,8 @@ export function createApp(options: AppOptions = {}) {
         })
       : (_req, _res, next) => next();
 
-  app.use('/api/auth', authRoutes(limitAttempts));
-  app.use('/api/users', usersRoutes);
-  app.use('/api/tenants', tenantsRoutes);
-  app.use('/api/patients', patientsRoutes);
-  app.use('/api/prescriptions', prescriptionsRoutes);
+  for (const [path, router] of apiRouters(limitAttempts)) app.use(path, router);
+  if (options.apiDocs ?? env.API_DOCS) app.use('/api', docsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
