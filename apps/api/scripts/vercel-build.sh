@@ -6,6 +6,10 @@
 set -eu
 
 npm run build
+# Vercel expects a non-empty folder of static files (outputDirectory in vercel.json). The API's only one:
+# a robots.txt that keeps search engines off it.
+mkdir -p public
+printf 'User-agent: *\nDisallow: /\n' > public/robots.txt
 
 if [ "${VERCEL_ENV:-}" = production ]; then
   : "${DATABASE_URL_UNPOOLED:?must be set to the direct (unpooled) database URL, for migrations}"
