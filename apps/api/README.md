@@ -3,9 +3,7 @@
 REST API for Medi Cloud: multi-tenant (one tenant per hospital), JWT authentication, role-based access.
 TypeScript, Express 5, PostgreSQL with Prisma 7, zod validation.
 
-> ⚠️ **Not deployed from here yet.** The live API (`https://medi-cloud-backend.vercel.app/api`) still runs the old
-> MongoDB version from [medi-cloud-backend](https://github.com/ikbal-hussain/medi-cloud-backend). It moves to this
-> folder when the PostgreSQL deploy ships.
+Live at `https://medi-cloud-backend.vercel.app/api` (see [Deploying](#deploying-vercel--neon)).
 
 ## Run it locally
 
@@ -47,8 +45,20 @@ All settings are environment variables, validated at startup (`src/config/env.ts
 | `db:deploy` | Apply migrations only (production) |
 | `db:check` | Fails if `schema.prisma` has changes no migration covers (runs in CI) |
 | `db:studio` | Browse the database |
-| `seed` | Demo data. Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
+| `seed` | Replaces all hospitals, staff and patients with demo data (super admins are kept). Refuses a non-local database unless `ALLOW_DEMO_RESET=yes` |
 | `create-super-admin` | Platform super admin from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (12+ characters; no default) |
+
+## Deploying (Vercel + Neon)
+
+The live API is the Vercel project `medi-cloud-backend`, built from this folder (Root Directory `apps/api`). Every push to `main` deploys it.
+
+- **Region:** Singapore (`sin1` in [vercel.json](vercel.json)), next to its Neon PostgreSQL. Each request makes several database queries, so the API and the database share a region.
+- **Settings:** `JWT_SECRET` and `CORS_ORIGINS` are set on the project. The Neon integration adds `DATABASE_URL` (pooled, used by the API) and `DATABASE_URL_UNPOOLED` (a direct connection).
+- **Migrations run on each production deploy**, after a successful build (`buildCommand` in vercel.json). They use the direct connection, because the pooled one can't hold the lock migrations take. Preview deployments skip them.
+- **Demo data:** `ALLOW_DEMO_RESET=yes DATABASE_URL=… npm run seed -w @medi-cloud/api` replaces every hospital, staff member and patient with the demo set. Super admins are kept.
+- **First super admin:** `DATABASE_URL=… SUPER_ADMIN_EMAIL=… SUPER_ADMIN_PASSWORD=… npm run create-super-admin -w @medi-cloud/api`. Keep it private: it can delete every hospital.
+
+Any other host works the same way: `npm run build && npm start` with `DATABASE_URL` and `JWT_SECRET` set, after `npm run db:deploy`.
 
 ## Roles
 
