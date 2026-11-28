@@ -35,33 +35,51 @@ describe('API docs', () => {
     expect([...documented].sort()).toEqual([...actual].sort());
   });
 
-  it('describe what each read endpoint really returns', async () => {
+  it('answer every documented operation with its documented status and shape', async () => {
     const root = await superAdmin();
     const city = await hospital('City');
     const patient = await createPatient(city.tenant.id);
     const rx = await createPrescription(city.tenant.id, patient.id, city.doctor.id);
-    const ids: Record<string, string> = {
-      '/users/{id}': city.doctor.id,
-      '/tenants/{id}': city.tenant.id,
-      '/patients/{id}': patient.id,
-      '/prescriptions/{id}': rx.id,
+    const tenantId = city.tenant.id;
+    // Records the write operations create, by operationId, for the ones that change or delete them.
+    const made: Record<string, string> = {};
+    // The record each {id} operation acts on, and body fields added to the documented example: a SUPER_ADMIN
+    // (who runs everything here) must name the hospital and the doctor.
+    const plan: Record<string, { id?: () => string | undefined; body?: () => object }> = {
+      login: { body: () => ({ email: city.admin.email, password: PASSWORD }) },
+      getUser: { id: () => city.doctor.id },
+      createUser: { body: () => ({ tenantId }) },
+      updateUser: { id: () => made['createUser'] },
+      deleteUser: { id: () => made['createUser'] },
+      getTenant: { id: () => tenantId },
+      getPatient: { id: () => patient.id },
+      createPatient: { body: () => ({ tenantId }) },
+      updatePatient: { id: () => made['createPatient'] },
+      deletePatient: { id: () => made['createPatient'] },
+      getPrescription: { id: () => rx.id },
+      createPrescription: { body: () => ({ tenantId, patientId: made['createPatient'], doctorId: city.doctor.id }) },
+      updatePrescription: { id: () => made['createPrescription'] },
+      deletePrescription: { id: () => made['createPrescription'] },
     };
+    // Deletes last, in reverse (a prescription before its patient).
+    const ordered = [
+      ...operations.filter((op) => op.method !== 'delete'),
+      ...operations.filter((op) => op.method === 'delete').reverse(),
+    ];
 
-    for (const op of operations.filter((o) => o.method === 'get')) {
-      const res = await api()
-        .get(`/api${op.path.replace('{id}', ids[op.path] ?? '')}`)
-        .set(as(root.id));
-      expect(res.status, op.operationId).toBe(200);
+    for (const op of ordered) {
+      const step = plan[op.operationId] ?? {};
+      const path = `/api${op.path.replace('{id}', step.id?.() ?? 'missing-from-plan')}`;
+      const body = op.body && { ...op.body.example, ...step.body?.() };
+      const res = await api()[op.method](path).set(as(root.id)).send(body);
+      expect(res.status, `${op.operationId}: ${JSON.stringify(res.body)}`).toBe(op.response.status ?? 200);
+      expect(responseSchemaOf(op).safeParse(res.body).error?.issues ?? [], op.operationId).toEqual([]);
       if (op.response.list) expect(res.body.length, `${op.operationId} returned an empty list`).toBeGreaterThan(0);
-      const parsed = responseSchemaOf(op).safeParse(res.body);
-      expect(parsed.error?.issues ?? [], op.operationId).toEqual([]);
+      if (op.method === 'post' && res.body.id) made[op.operationId] = res.body.id;
     }
 
-    const login = await api().post('/api/auth/login').send({ email: city.admin.email, password: PASSWORD });
-    expect(
-      responseSchemaOf(operations.find((o) => o.operationId === 'login')!).safeParse(login.body).error,
-    ).toBeUndefined();
     const failed = await api().post('/api/auth/login').send({ email: city.admin.email, password: 'wrong-password' });
+    expect(failed.status).toBe(401);
     expect(responseSchemas.Error.safeParse(failed.body).error).toBeUndefined();
   });
 

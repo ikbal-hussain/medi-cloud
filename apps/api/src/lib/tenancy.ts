@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { getAuth } from '../middleware/authenticate';
-import { AppError, notFound } from './errors';
+import { AppError, badRequest, notFound } from './errors';
 import { isUuid } from './ids';
 import { prisma } from './prisma';
 
@@ -22,9 +22,15 @@ export function tenantScope(req: Request): { tenantId?: string } {
   return { tenantId: user.tenantId };
 }
 
-/** The hospital a new row belongs to: the caller's own, or (SUPER_ADMIN only) an existing one they name. */
+/**
+ * The hospital a new row belongs to: the caller's own, or (SUPER_ADMIN only) an existing one they name.
+ * A SUPER_ADMIN must name one: their own tenant is the platform's, which no hospital can see.
+ */
 export async function tenantForCreate(req: Request, requested: string | undefined): Promise<string> {
   const { user } = getAuth(req);
+  if (requested === undefined && user.role === 'SUPER_ADMIN') {
+    throw badRequest('tenantId is required: a super admin must name the hospital');
+  }
   if (requested === undefined || requested === user.tenantId) return user.tenantId;
   if (user.role !== 'SUPER_ADMIN') throw denied();
   const exists =

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { prisma } from '../src/lib/prisma';
 import { api, as, createPatient, createPrescription, hospital, patientInput, superAdmin } from './helpers';
 
 // Hospitals must never see or change each other's data.
@@ -77,6 +78,20 @@ describe('tenant isolation', () => {
       .set(as(root.id))
       .send(patientInput({ tenantId: '0195f000-0000-7000-8000-000000000000' }));
     expect(unknown.status).toBe(404);
+  });
+
+  it('makes a super admin name the hospital when creating staff or patients', async () => {
+    const root = await superAdmin();
+    for (const [path, body] of [
+      ['/api/patients', patientInput()],
+      ['/api/users', { email: 'x@city.test', password: 'a-long-passphrase', name: 'X', role: 'DOCTOR' }],
+    ] as const) {
+      const res = await api().post(path).set(as(root.id)).send(body);
+      expect(res.status, path).toBe(400);
+      expect(res.body.error).toMatch(/tenantId is required/);
+    }
+    // Nothing was filed in the platform's own tenant.
+    expect(await prisma.patient.count({ where: { tenantId: root.tenantId } })).toBe(0);
   });
 
   it('keeps hospitals off the tenants list', async () => {

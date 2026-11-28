@@ -7,7 +7,9 @@ const email = z
   .string({ error: 'Email is required' })
   .trim()
   .toLowerCase()
-  .pipe(z.email({ error: 'Enter a valid email address' }));
+  .pipe(z.email({ error: 'Enter a valid email address' }))
+  // For the API docs, which describe what a request may send (the string before the pipe).
+  .meta({ format: 'email' });
 
 /** Bytes a string takes in UTF-8 (no TextEncoder: this package runs in both Node and the browser). */
 const utf8Length = (text: string) => {
@@ -24,7 +26,8 @@ export const newPassword = z
   .string({ error: 'Password is required' })
   .min(8, { error: 'Password must be at least 8 characters' })
   // bcrypt only uses the first 72 bytes, so anything longer would be silently cut.
-  .refine((p) => utf8Length(p) <= 72, { error: 'Password must be at most 72 characters' });
+  .refine((p) => utf8Length(p) <= 72, { error: 'Password must be at most 72 characters' })
+  .meta({ description: '8 to 72 bytes (bcrypt reads at most 72)' });
 
 const name = (label: string, max = 120) =>
   z
@@ -77,7 +80,8 @@ const patientFields = {
         .int({ error: 'Age must be a whole number' })
         .min(0, { error: 'Age cannot be negative' })
         .max(150, { error: 'Age must be at most 150' }),
-    ),
+    )
+    .meta({ description: 'Whole years, 0 to 150. A numeric string such as "41" is accepted too.' }),
   gender: z.enum(GENDERS, { error: 'Gender must be Male, Female or Other' }),
   type: z.enum(PATIENT_TYPES, { error: 'Type must be OPD or IPD' }),
   phoneNumber: name('Phone number', 30),
@@ -87,7 +91,8 @@ const patientFields = {
     .union([z.date(), z.string().trim().min(1, { error: 'Admission date is required' })], {
       error: 'Admission date is required',
     })
-    .pipe(z.coerce.date<string | Date>({ error: 'Admission date must be a valid date' })),
+    .pipe(z.coerce.date<string | Date>({ error: 'Admission date must be a valid date' }))
+    .meta({ description: 'ISO 8601 date or date-time, e.g. 2026-11-28 or 2026-11-28T09:00:00Z' }),
   status: z.enum(PATIENT_STATUSES, { error: 'Status must be Active or Discharged' }),
 };
 

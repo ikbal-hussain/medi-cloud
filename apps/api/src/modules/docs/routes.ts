@@ -45,7 +45,8 @@ docsRoutes.get('/openapi.json', (_req, res) => {
 });
 
 docsRoutes.get('/docs', (req, res) => {
-  // Relative to wherever the API is mounted (e.g. behind a proxy at /api).
+  // An absolute path under the API's own mount point (/api), like the document's `servers` entry. A proxy in
+  // front must keep the /api prefix, as the bundled nginx config does.
   const specUrl = `${req.baseUrl}/openapi.json`;
   res.setHeader('Content-Security-Policy', CSP);
   res.type('html').send(`<!doctype html>

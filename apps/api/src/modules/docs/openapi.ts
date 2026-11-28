@@ -65,13 +65,17 @@ export interface Operation {
   /** Query parameters (all optional strings): name → description. */
   query?: Record<string, string>;
   body?: { schema: keyof typeof requestSchemas; example?: Record<string, unknown> };
+  /** The body may name a hospital (`tenantId`): required for a SUPER_ADMIN, forbidden for others unless it's their own. */
+  tenantInBody?: true;
   response: { schema: keyof typeof responseSchemas; list?: true; status?: 200 | 201 };
   /** Errors beyond the ones implied by access, body and {id}: status → when. */
   errors?: Record<number, string>;
 }
 
 const ADMINS: Role[] = ['SUPER_ADMIN', 'HOSPITAL_ADMIN'];
-const tenantQuery = { tenantId: 'SUPER_ADMIN only: just this hospital. Others always get their own.' };
+const tenantQuery = {
+  tenantId: "SUPER_ADMIN: only this hospital. Anyone else may pass only their own hospital's id (403 otherwise).",
+};
 
 export const operations: Operation[] = [
   {
@@ -166,8 +170,9 @@ export const operations: Operation[] = [
     operationId: 'createUser',
     tag: 'Staff',
     summary: 'Add a staff member',
-    description: 'In your own hospital. A SUPER_ADMIN may name another with `tenantId`.',
+    description: 'In your own hospital. A SUPER_ADMIN must name the hospital with `tenantId`.',
     access: ADMINS,
+    tenantInBody: true,
     body: {
       schema: 'CreateUserRequest',
       example: { email: 'new.doctor@city.com', password: 'a-long-passphrase', name: 'Dr. New Doctor', role: 'DOCTOR' },
@@ -185,7 +190,10 @@ export const operations: Operation[] = [
     access: ADMINS,
     body: { schema: 'UpdateUserRequest', example: { name: 'Dr. Renamed' } },
     response: { schema: 'User' },
-    errors: { 409: 'The email is already registered (EMAIL_TAKEN)' },
+    errors: {
+      400: 'Invalid input (VALIDATION_ERROR or INVALID_JSON), or a change to your own role',
+      409: 'The email is already registered (EMAIL_TAKEN)',
+    },
   },
   {
     method: 'delete',
@@ -241,7 +249,9 @@ export const operations: Operation[] = [
     operationId: 'createPatient',
     tag: 'Patients',
     summary: 'Admit a patient',
+    description: 'In your own hospital. A SUPER_ADMIN must name the hospital with `tenantId`.',
     access: 'signed-in',
+    tenantInBody: true,
     body: {
       schema: 'CreatePatientRequest',
       example: {
@@ -304,8 +314,9 @@ export const operations: Operation[] = [
     tag: 'Prescriptions',
     summary: 'Write a prescription',
     description:
-      'A doctor writes as themselves, for a patient of their hospital. A SUPER_ADMIN must name the doctor (`doctorId`).',
+      'A doctor writes as themselves, for a patient of their hospital. A SUPER_ADMIN must name the hospital (`tenantId`) and one of its doctors (`doctorId`).',
     access: ['DOCTOR', 'SUPER_ADMIN'],
+    tenantInBody: true,
     body: {
       schema: 'CreatePrescriptionRequest',
       example: {
@@ -316,7 +327,7 @@ export const operations: Operation[] = [
       },
     },
     response: { schema: 'Prescription', status: 201 },
-    errors: { 404: 'No such patient in that hospital' },
+    errors: { 404: 'No such patient in that hospital, or no such hospital (NOT_FOUND)' },
   },
   {
     method: 'put',
@@ -376,10 +387,22 @@ function componentSchemas(schemas: Record<string, z.ZodType>, io: 'input' | 'out
 
 function errorResponses(op: Operation) {
   const errors: Record<number, string> = {};
-  if (op.body) errors[400] = 'Invalid input (VALIDATION_ERROR, with `details`)';
+  const roles = Array.isArray(op.access);
+  const namesTenant = op.query?.['tenantId'] !== undefined || op.tenantInBody === true;
+  if (op.body) {
+    errors[400] = 'Invalid input: VALIDATION_ERROR (with `details` when fields fail) or INVALID_JSON';
+    errors[413] = 'The body is over 1 MB';
+  }
   if (op.access !== 'public') errors[401] = 'No token, or an invalid one (NO_TOKEN, INVALID_TOKEN, USER_NOT_FOUND)';
-  if (Array.isArray(op.access)) errors[403] = 'Your role may not do this (FORBIDDEN)';
+  if (roles || namesTenant) {
+    const why = [
+      roles && 'your role may not do this',
+      namesTenant && "only a SUPER_ADMIN may name another hospital's `tenantId`",
+    ];
+    errors[403] = `${why.filter(Boolean).join('; ')} (FORBIDDEN)`.replace(/^./, (c) => c.toUpperCase());
+  }
   if (op.path.includes('{id}')) errors[404] = 'Not found, or in another hospital (NOT_FOUND)';
+  else if (op.tenantInBody) errors[404] = 'No such hospital (`tenantId`) (NOT_FOUND)';
   Object.assign(errors, op.errors);
   return Object.fromEntries(
     Object.entries(errors).map(([status, description]) => [status, { description, content: json(ref('Error')) }]),

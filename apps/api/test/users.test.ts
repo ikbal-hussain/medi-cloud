@@ -71,11 +71,11 @@ describe('staff management', () => {
 
   it("doesn't let a hospital admin take over a super admin in the same tenant", async () => {
     const root = await superAdmin();
-    // A super admin who adds staff without naming a hospital puts them in the platform tenant.
+    // A super admin can still put staff in the platform's own tenant by naming it.
     const created = await api()
       .post('/api/users')
       .set(as(root.id))
-      .send({ ...newStaff, role: 'HOSPITAL_ADMIN' });
+      .send({ ...newStaff, role: 'HOSPITAL_ADMIN', tenantId: root.tenantId });
     expect(created.status).toBe(201);
     const opsAdmin = created.body.id as string;
 
