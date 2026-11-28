@@ -77,3 +77,32 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+
+  docker:
+    name: Docker (whole platform)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      JWT_SECRET: ci-only-secret-never-used-anywhere-else
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start database, migrations, API and web
+        run: docker compose up --build --wait --wait-timeout 240
+      - name: Load demo data with the tools image
+        run: docker compose run --rm migrate npm run seed
+      - name: Smoke test through the web container (nginx → API → PostgreSQL)
+        run: |
+          curl -fsS http://localhost:8080/api/health/db
+          curl -fsS http://localhost:8080/ | grep -q '<div id="root">'
+          token=$(curl -fsS -X POST http://localhost:8080/api/auth/login -H 'content-type: application/json' \
+            -d '{"email":"nurse@city.com","password":"nurse123"}' | jq -r .token)
+          curl -fsS http://localhost:8080/api/patients -H "Authorization: Bearer $token" | jq -e 'length == 3'
+          curl -fsS -X POST http://localhost:8080/api/patients -H "Authorization: Bearer $token" \
+            -H 'content-type: application/json' \
+            -d '{"name":"CI Test","age":30,"gender":"Other","type":"OPD","phoneNumber":"555-0199","address":"1 CI Road","admissionDate":"2026-11-28T10:00:00Z"}' \
+            | jq -e '.name == "CI Test"'
+      - name: Image sizes
+        run: docker image ls --format '{{.Repository}} {{.Size}}' | grep -E 'api|web|migrate'
+      - name: Logs
+        if: failure()
+        run: docker compose logs
