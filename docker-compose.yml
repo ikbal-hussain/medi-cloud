@@ -19,10 +19,26 @@ services:
       timeout: 3s
       retries: 30
 
+  # Applies pending migrations, then exits; the API starts only after it succeeds. The API image never migrates
+  # by itself, so `up --no-deps api` skips migrations. On a redeploy the old API keeps serving while this runs:
+  # keep migrations backward-compatible (add first, drop in a later release), as on Vercel.
+  # It has the full toolchain, so it also runs one-off jobs: docker compose run --rm migrate npm run seed
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: tools
+    environment:
+      DATABASE_URL: postgresql://medi:medi@postgres:5432/medi_cloud
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      target: runtime
     environment:
       DATABASE_URL: postgresql://medi:medi@postgres:5432/medi_cloud
       # Not `:?`: that would also block `docker compose up postgres`. Without it the API exits with a clear error.
@@ -31,8 +47,8 @@ services:
       # nginx (the web container) is the one proxy in front: trust its X-Forwarded-For for client IPs.
       TRUST_PROXY: 1
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/health/db || exit 1']
       interval: 5s
