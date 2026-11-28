@@ -20,3 +20,7 @@ updates:
     directories: [/apps/api, /apps/web]
     schedule:
       interval: monthly
+    # One PR for all base images: the API's two FROM lines must move to the same Alpine release together.
+    groups:
+      base-images:
+        patterns: ['*']

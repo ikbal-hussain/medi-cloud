@@ -45,7 +45,7 @@ npm run dev                             # API on http://localhost:3000, app on h
 ```bash
 echo "JWT_SECRET=$(openssl rand -hex 32)" > .env   # once
 docker compose up --build                           # app on http://localhost:8080 (WEB_PORT to change)
-docker compose run --rm migrate npm run seed        # optional demo data (replaces all hospitals; keeps super admins)
+docker compose run --rm migrate npm run seed        # optional demo data, after `up` (which migrates); keeps super admins
 ```
 
 The API image is small (about 60 MB to download): plain Alpine with Node, production dependencies and the built API, running as a non-root user, with no npm or build tools. Migrations run first in a one-off `migrate` container, built from the same Dockerfile's `tools` stage. It also runs other one-off jobs, e.g. `docker compose run --rm -e SUPER_ADMIN_EMAIL=… -e SUPER_ADMIN_PASSWORD=… migrate npm run create-super-admin`.

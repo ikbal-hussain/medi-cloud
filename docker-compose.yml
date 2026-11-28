@@ -19,8 +19,10 @@ services:
       timeout: 3s
       retries: 30
 
-  # Applies pending migrations, then exits; the API starts only after it succeeds. It has the full toolchain, so
-  # it also runs one-off jobs: docker compose run --rm migrate npm run seed
+  # Applies pending migrations, then exits; the API starts only after it succeeds. The API image never migrates
+  # by itself, so `up --no-deps api` skips migrations. On a redeploy the old API keeps serving while this runs:
+  # keep migrations backward-compatible (add first, drop in a later release), as on Vercel.
+  # It has the full toolchain, so it also runs one-off jobs: docker compose run --rm migrate npm run seed
   migrate:
     build:
       context: .

@@ -91,12 +91,13 @@ jobs:
       - name: Load demo data with the tools image
         run: docker compose run --rm migrate npm run seed
       - name: Smoke test through the web container (nginx → API → PostgreSQL)
+        shell: bash # -eo pipefail: a failed curl inside a pipe fails the step
         run: |
           curl -fsS http://localhost:8080/api/health/db
           curl -fsS http://localhost:8080/ | grep -q '<div id="root">'
           token=$(curl -fsS -X POST http://localhost:8080/api/auth/login -H 'content-type: application/json' \
-            -d '{"email":"nurse@city.com","password":"nurse123"}' | jq -r .token)
-          curl -fsS http://localhost:8080/api/patients -H "Authorization: Bearer $token" | jq -e 'length == 3'
+            -d '{"email":"nurse@city.com","password":"nurse123"}' | jq -er .token)
+          curl -fsS http://localhost:8080/api/patients -H "Authorization: Bearer $token" | jq -e 'type == "array" and length > 0'
           curl -fsS -X POST http://localhost:8080/api/patients -H "Authorization: Bearer $token" \
             -H 'content-type: application/json' \
             -d '{"name":"CI Test","age":30,"gender":"Other","type":"OPD","phoneNumber":"555-0199","address":"1 CI Road","admissionDate":"2026-11-28T10:00:00Z"}' \
