@@ -29,7 +29,10 @@ test.describe('day-to-day flows', () => {
     const form = page.locator('form');
     const value = await form
       .locator('select option')
-      .evaluateAll((options, name) => (options as HTMLOptionElement[]).find((o) => o.text.includes(name))?.value, patient);
+      .evaluateAll(
+        (options, name) => (options as HTMLOptionElement[]).find((o) => o.text.includes(name))?.value,
+        patient,
+      );
     expect(value).toBeTruthy();
     await form.locator('select').selectOption(value!);
     await form.locator('input').first().fill('Viral fever');
@@ -65,7 +68,7 @@ test.describe('day-to-day flows', () => {
     await expect(page.getByText(email)).toBeVisible();
   });
 
-  test("another hospital sees none of it, in the API or the app", async ({ page, request }) => {
+  test('another hospital sees none of it, in the API or the app', async ({ page, request }) => {
     const patient = `Chandra ${unique()}`;
     await createPatient(request, DEMO.receptionist, patient);
 
@@ -85,12 +88,19 @@ test.describe('day-to-day flows', () => {
 
   test('a new hospital registers and lands on its dashboard', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /register|get started|sign up/i }).first().click();
+    await page
+      .getByRole('button', { name: /register|get started|sign up/i })
+      .first()
+      .click();
     const inputs = page.locator('form input');
     const texts = ['Sunrise Clinic', 'Dr. Owner'];
     for (let i = 0, t = 0; i < (await inputs.count()); i++) {
       const type = await inputs.nth(i).getAttribute('type');
-      await inputs.nth(i).fill(type === 'email' ? `owner.${unique()}@sunrise.test` : type === 'password' ? 'long-enough-1' : texts[t++]!);
+      await inputs
+        .nth(i)
+        .fill(
+          type === 'email' ? `owner.${unique()}@sunrise.test` : type === 'password' ? 'long-enough-1' : texts[t++]!,
+        );
     }
     await page.locator('form button[type=submit]').click();
     await expect(page.getByText('Sunrise Clinic').first()).toBeVisible();

@@ -70,13 +70,7 @@ function App() {
     return <LandingPage onAuthSuccess={checkAuth} />;
   }
 
-  return (
-    <Dashboard
-      user={authData.user}
-      tenant={authData.tenant}
-      onLogout={handleLogout}
-    />
-  );
+  return <Dashboard user={authData.user} tenant={authData.tenant} onLogout={handleLogout} />;
 }
 
 export default App;

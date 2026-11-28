@@ -20,7 +20,12 @@ describe('shared schemas', () => {
   });
 
   it('never lets the API assign SUPER_ADMIN', () => {
-    const result = createUserSchema.safeParse({ email: 'a@b.co', password: 'long-enough', name: 'A', role: 'SUPER_ADMIN' });
+    const result = createUserSchema.safeParse({
+      email: 'a@b.co',
+      password: 'long-enough',
+      name: 'A',
+      role: 'SUPER_ADMIN',
+    });
     expect(result.success).toBe(false);
   });
 
@@ -39,7 +44,8 @@ describe('shared schemas', () => {
   });
 
   it('rejects empty or null age and date instead of storing 0 or 1970', () => {
-    for (const age of ['', '  ', null, false, []]) expect(updatePatientSchema.safeParse({ age }).success, JSON.stringify(age)).toBe(false);
+    for (const age of ['', '  ', null, false, []])
+      expect(updatePatientSchema.safeParse({ age }).success, JSON.stringify(age)).toBe(false);
     for (const admissionDate of ['', null, 0, true]) {
       expect(updatePatientSchema.safeParse({ admissionDate }).success, JSON.stringify(admissionDate)).toBe(false);
     }

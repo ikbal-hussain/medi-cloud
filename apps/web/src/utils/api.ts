@@ -19,7 +19,10 @@ const removeToken = (): void => {
 
 // An API failure that keeps the HTTP status, so callers can tell a rejected token (401) from a network or server error.
 export class ApiError extends Error {
-  constructor(message: string, public status: number) {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
     super(message);
     this.name = 'ApiError';
   }
@@ -34,10 +37,7 @@ export const errorMessage = (error: unknown, fallback: string): string => {
 };
 
 // API request helper
-const apiRequest = async <T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> => {
+const apiRequest = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const token = getToken();
   // new Headers() accepts every HeadersInit form (object, array of pairs, Headers), so a caller's headers are never dropped.
   const headers = new Headers(options.headers);
@@ -107,14 +107,16 @@ export const authAPI = {
 // Users API
 export const usersAPI = {
   getAll: async () => {
-    const users = await apiRequest<Array<{
-      id: string;
-      tenantId: string;
-      email: string;
-      name: string;
-      role: UserRole;
-      createdAt: string;
-    }>>('/users');
+    const users = await apiRequest<
+      Array<{
+        id: string;
+        tenantId: string;
+        email: string;
+        name: string;
+        role: UserRole;
+        createdAt: string;
+      }>
+    >('/users');
     return users;
   },
 
@@ -167,18 +169,20 @@ export const usersAPI = {
 // Patients API
 export const patientsAPI = {
   getAll: async () => {
-    const patients = await apiRequest<Array<{
-      id: string;
-      tenantId: string;
-      name: string;
-      age: number;
-      gender: Patient['gender'];
-      type: Patient['type'];
-      phoneNumber: string;
-      address: string;
-      admissionDate: string;
-      status: Patient['status'];
-    }>>('/patients');
+    const patients = await apiRequest<
+      Array<{
+        id: string;
+        tenantId: string;
+        name: string;
+        age: number;
+        gender: Patient['gender'];
+        type: Patient['type'];
+        phoneNumber: string;
+        address: string;
+        admissionDate: string;
+        status: Patient['status'];
+      }>
+    >('/patients');
     return patients;
   },
 
@@ -224,16 +228,19 @@ export const patientsAPI = {
     });
   },
 
-  update: async (id: string, patient: {
-    name?: string;
-    age?: number;
-    gender?: Patient['gender'];
-    type?: Patient['type'];
-    phoneNumber?: string;
-    address?: string;
-    admissionDate?: string;
-    status?: Patient['status'];
-  }) => {
+  update: async (
+    id: string,
+    patient: {
+      name?: string;
+      age?: number;
+      gender?: Patient['gender'];
+      type?: Patient['type'];
+      phoneNumber?: string;
+      address?: string;
+      admissionDate?: string;
+      status?: Patient['status'];
+    },
+  ) => {
     return apiRequest<{
       id: string;
       tenantId: string;
@@ -266,16 +273,18 @@ export const prescriptionsAPI = {
     if (doctorId) params.append('doctorId', doctorId);
     const query = params.toString();
     const endpoint = query ? `/prescriptions?${query}` : '/prescriptions';
-    const prescriptions = await apiRequest<Array<{
-      id: string;
-      tenantId: string;
-      patientId: string;
-      doctorId: string;
-      medications: string;
-      diagnosis: string;
-      notes: string;
-      createdAt: string;
-    }>>(endpoint);
+    const prescriptions = await apiRequest<
+      Array<{
+        id: string;
+        tenantId: string;
+        patientId: string;
+        doctorId: string;
+        medications: string;
+        diagnosis: string;
+        notes: string;
+        createdAt: string;
+      }>
+    >(endpoint);
     return prescriptions;
   },
 
@@ -292,12 +301,7 @@ export const prescriptionsAPI = {
     }>(`/prescriptions/${id}`);
   },
 
-  create: async (prescription: {
-    patientId: string;
-    medications: string;
-    diagnosis: string;
-    notes?: string;
-  }) => {
+  create: async (prescription: { patientId: string; medications: string; diagnosis: string; notes?: string }) => {
     return apiRequest<{
       id: string;
       tenantId: string;
@@ -313,11 +317,14 @@ export const prescriptionsAPI = {
     });
   },
 
-  update: async (id: string, prescription: {
-    medications?: string;
-    diagnosis?: string;
-    notes?: string;
-  }) => {
+  update: async (
+    id: string,
+    prescription: {
+      medications?: string;
+      diagnosis?: string;
+      notes?: string;
+    },
+  ) => {
     return apiRequest<{
       id: string;
       tenantId: string;
@@ -341,4 +348,3 @@ export const prescriptionsAPI = {
 };
 
 export { getToken, setToken, removeToken };
-

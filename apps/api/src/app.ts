@@ -31,7 +31,8 @@ export function originAllowed(patterns: string[], allowLocalhost: boolean) {
   const escape = (s: string) => s.replace(/[.+?^${}()|[\]\\/]/g, '\\$&');
   const regexes = patterns.map((p) => new RegExp(`^${p.split('*').map(escape).join('[a-z0-9-]*')}$`, 'i'));
   return (origin: string) =>
-    regexes.some((r) => r.test(origin)) || (allowLocalhost && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin));
+    regexes.some((r) => r.test(origin)) ||
+    (allowLocalhost && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin));
 }
 
 export function createApp(options: AppOptions = {}) {

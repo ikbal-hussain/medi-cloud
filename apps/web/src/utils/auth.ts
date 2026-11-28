@@ -62,7 +62,7 @@ export const registerHospital = async (
   hospitalName: string,
   adminEmail: string,
   adminName: string,
-  password: string
+  password: string,
 ): Promise<void> => {
   await authAPI.register(hospitalName, adminEmail, adminName, password);
 };

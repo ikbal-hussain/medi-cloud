@@ -38,13 +38,18 @@ describe('staff management', () => {
 
   it('updates staff, including a new password', async () => {
     const city = await hospital('City');
-    const res = await api().put(`/api/users/${city.doctor.id}`).set(as(city.admin.id)).send({ name: 'Dr. Renamed', password: 'brand-new-pass' });
+    const res = await api()
+      .put(`/api/users/${city.doctor.id}`)
+      .set(as(city.admin.id))
+      .send({ name: 'Dr. Renamed', password: 'brand-new-pass' });
     expect(res.status).toBe(200);
     expect(res.body.name).toBe('Dr. Renamed');
-    expect((await api().post('/api/auth/login').send({ email: city.doctor.email, password: 'brand-new-pass' })).status).toBe(200);
+    expect(
+      (await api().post('/api/auth/login').send({ email: city.doctor.email, password: 'brand-new-pass' })).status,
+    ).toBe(200);
   });
 
-  it("stops admins from changing their own role or deleting themselves", async () => {
+  it('stops admins from changing their own role or deleting themselves', async () => {
     const city = await hospital('City');
     const demote = await api().put(`/api/users/${city.admin.id}`).set(as(city.admin.id)).send({ role: 'DOCTOR' });
     expect(demote.status).toBe(400);
@@ -67,7 +72,10 @@ describe('staff management', () => {
   it("doesn't let a hospital admin take over a super admin in the same tenant", async () => {
     const root = await superAdmin();
     // A super admin who adds staff without naming a hospital puts them in the platform tenant.
-    const created = await api().post('/api/users').set(as(root.id)).send({ ...newStaff, role: 'HOSPITAL_ADMIN' });
+    const created = await api()
+      .post('/api/users')
+      .set(as(root.id))
+      .send({ ...newStaff, role: 'HOSPITAL_ADMIN' });
     expect(created.status).toBe(201);
     const opsAdmin = created.body.id as string;
 

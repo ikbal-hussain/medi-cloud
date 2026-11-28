@@ -35,10 +35,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <X className="h-6 w-6" />
         </button>
 
@@ -52,16 +49,12 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
         <p className="text-gray-600 text-center mb-6">Create your hospital account in minutes</p>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Hospital Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hospital Name</label>
             <input
               type="text"
               value={hospitalName}
@@ -73,9 +66,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Admin Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Name</label>
             <input
               type="text"
               value={adminName}
@@ -87,9 +78,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
             <input
               type="email"
               value={email}
@@ -101,9 +90,7 @@ export default function RegisterModal({ onClose, onSuccess }: RegisterModalProps
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
               type="password"
               value={password}

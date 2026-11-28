@@ -41,7 +41,9 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
 
   // Other client mistakes Express or body-parser already rejected with a 4xx (bad URL encoding, unsupported
   // charset, body too large, aborted upload): keep their status, with a plain message.
-  const status = (err as { status?: unknown; statusCode?: unknown } | null)?.status ?? (err as { statusCode?: unknown } | null)?.statusCode;
+  const status =
+    (err as { status?: unknown; statusCode?: unknown } | null)?.status ??
+    (err as { statusCode?: unknown } | null)?.statusCode;
   if (typeof status === 'number' && status >= 400 && status < 500) {
     log.warn({ err, path: req.path }, 'rejected request');
     const message = { 413: 'Request body is too large', 415: 'Unsupported content type' }[status] ?? 'Bad request';
@@ -55,7 +57,8 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
         ? send(res, 409, { error: 'Email already registered', code: 'EMAIL_TAKEN' })
         : send(res, 409, { error: 'That already exists', code: 'CONFLICT' });
     }
-    if (err.code === 'P2003') return send(res, 409, { error: 'Other records still refer to this one', code: 'CONFLICT' });
+    if (err.code === 'P2003')
+      return send(res, 409, { error: 'Other records still refer to this one', code: 'CONFLICT' });
     if (err.code === 'P2025') return send(res, 404, { error: 'Not found', code: 'NOT_FOUND' });
   }
 

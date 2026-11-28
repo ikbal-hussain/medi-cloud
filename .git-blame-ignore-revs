@@ -1,0 +1,5 @@
+# Mechanical formatting commits that `git blame` should skip. GitHub reads this file automatically;
+# locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+# These hashes only survive merge commits: don't squash or rebase a PR that adds one.
+# Format the whole repo with Prettier
+b644e1fc6830fdfb1a39b6710463aea19a929645

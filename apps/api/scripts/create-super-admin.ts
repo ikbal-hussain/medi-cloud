@@ -7,7 +7,9 @@ import { prisma } from '../src/lib/prisma';
 
 async function main() {
   const email = loginSchema.shape.email.safeParse(process.env['SUPER_ADMIN_EMAIL']);
-  const password = newPassword.min(12, { error: 'SUPER_ADMIN_PASSWORD must be at least 12 characters' }).safeParse(process.env['SUPER_ADMIN_PASSWORD']);
+  const password = newPassword
+    .min(12, { error: 'SUPER_ADMIN_PASSWORD must be at least 12 characters' })
+    .safeParse(process.env['SUPER_ADMIN_PASSWORD']);
   if (!email.success || !password.success) {
     console.error('Set SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD (12+ characters).');
     if (!password.success) console.error(password.error.issues[0]?.message);

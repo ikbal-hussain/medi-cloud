@@ -25,7 +25,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
       onSuccess();
     } catch (err) {
       // Only a 401 means the credentials were wrong; anything else is the server or the network.
-      setError(err instanceof ApiError && err.status === 401 ? 'Invalid email or password' : errorMessage(err, 'Login failed. Please try again.'));
+      setError(
+        err instanceof ApiError && err.status === 401
+          ? 'Invalid email or password'
+          : errorMessage(err, 'Login failed. Please try again.'),
+      );
     } finally {
       setLoading(false);
     }
@@ -34,10 +38,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <X className="h-6 w-6" />
         </button>
 
@@ -51,16 +52,12 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
         <p className="text-gray-600 text-center mb-6">Sign in to your hospital account</p>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
             <input
               type="email"
               value={email}
@@ -72,9 +69,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
               type="password"
               value={password}
@@ -97,10 +92,18 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-700 font-medium mb-2">Demo Accounts:</p>
           <div className="text-xs text-gray-600 space-y-1">
-            <p><strong>Assam Hospital Admin:</strong> admin@city.com / admin123</p>
-            <p><strong>Assam Hospital Doctor:</strong> doc@city.com / doc123</p>
-            <p><strong>Pune Galaxy Hospital Admin:</strong> admin@galaxy.com / admin123</p>
-            <p><strong>Assam Hospital Nurse:</strong> nurse@city.com / nurse123</p>
+            <p>
+              <strong>Assam Hospital Admin:</strong> admin@city.com / admin123
+            </p>
+            <p>
+              <strong>Assam Hospital Doctor:</strong> doc@city.com / doc123
+            </p>
+            <p>
+              <strong>Pune Galaxy Hospital Admin:</strong> admin@galaxy.com / admin123
+            </p>
+            <p>
+              <strong>Assam Hospital Nurse:</strong> nurse@city.com / nurse123
+            </p>
           </div>
         </div>
       </div>

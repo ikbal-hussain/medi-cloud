@@ -28,6 +28,9 @@ dist-ssr
 .vercel
 .netlify
 
+# Test coverage reports
+coverage
+
 # Playwright
 test-results
 playwright-report

@@ -28,7 +28,10 @@ describe('platform', () => {
   });
 
   it('allows configured origins, deploy previews by pattern, and localhost in development', () => {
-    const allowed = originAllowed(['https://medi-cloud-app.netlify.app', 'https://deploy-preview-*--medi-cloud-app.netlify.app'], true);
+    const allowed = originAllowed(
+      ['https://medi-cloud-app.netlify.app', 'https://deploy-preview-*--medi-cloud-app.netlify.app'],
+      true,
+    );
     expect(allowed('https://medi-cloud-app.netlify.app')).toBe(true);
     expect(allowed('https://deploy-preview-42--medi-cloud-app.netlify.app')).toBe(true);
     expect(allowed('http://localhost:5173')).toBe(true);
@@ -46,7 +49,9 @@ describe('platform', () => {
   });
 
   it('classifies an unreachable database as unavailable (503), not as a bug', async () => {
-    const offline = new PrismaClient({ adapter: new PrismaPg({ connectionString: 'postgresql://x:y@127.0.0.1:1/none', connectionTimeoutMillis: 1000 }) });
+    const offline = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: 'postgresql://x:y@127.0.0.1:1/none', connectionTimeoutMillis: 1000 }),
+    });
     const err = await offline.tenant.count().catch((e: unknown) => e);
     expect(isDatabaseUnavailable(err)).toBe(true);
     expect(isDatabaseUnavailable(new Error('boom'))).toBe(false);
@@ -71,7 +76,11 @@ describe('logging', () => {
     const log = createLogger({ write: (line: string) => void lines.push(line) });
     log.level = 'info';
     log.info(
-      { req: { headers: { authorization: 'Bearer secret-token' } }, user: { password: 'hunter2', passwordHash: '$2b$10$abc' }, token: 'tok-123' },
+      {
+        req: { headers: { authorization: 'Bearer secret-token' } },
+        user: { password: 'hunter2', passwordHash: '$2b$10$abc' },
+        token: 'tok-123',
+      },
       'probe',
     );
     const written = lines.join('');

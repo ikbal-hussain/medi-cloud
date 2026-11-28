@@ -18,7 +18,15 @@ export async function hospital(name: string) {
   const tenant = await prisma.tenant.create({ data: { name } });
   const slug = name.toLowerCase().replace(/[^a-z]+/g, '');
   const user = (role: 'HOSPITAL_ADMIN' | 'DOCTOR' | 'RECEPTIONIST', who: string) =>
-    prisma.user.create({ data: { tenantId: tenant.id, email: `${who}@${slug}.test`, name: `${who} of ${name}`, role, passwordHash: passwordHash! } });
+    prisma.user.create({
+      data: {
+        tenantId: tenant.id,
+        email: `${who}@${slug}.test`,
+        name: `${who} of ${name}`,
+        role,
+        passwordHash: passwordHash!,
+      },
+    });
   const [admin, doctor, receptionist] = await Promise.all([
     user('HOSPITAL_ADMIN', 'admin'),
     user('DOCTOR', 'doctor'),
@@ -53,8 +61,19 @@ export const patientInput = (overrides: Record<string, unknown> = {}) => ({
 
 export const createPatient = (tenantId: string, name = 'Mary Williams') =>
   prisma.patient.create({
-    data: { tenantId, name, age: 32, gender: 'Female', type: 'IPD', phoneNumber: '555-0102', address: '456 Oak Ave', admissionDate: new Date('2026-11-27') },
+    data: {
+      tenantId,
+      name,
+      age: 32,
+      gender: 'Female',
+      type: 'IPD',
+      phoneNumber: '555-0102',
+      address: '456 Oak Ave',
+      admissionDate: new Date('2026-11-27'),
+    },
   });
 
 export const createPrescription = (tenantId: string, patientId: string, doctorId: string) =>
-  prisma.prescription.create({ data: { tenantId, patientId, doctorId, medications: 'Paracetamol 500mg', diagnosis: 'Fever' } });
+  prisma.prescription.create({
+    data: { tenantId, patientId, doctorId, medications: 'Paracetamol 500mg', diagnosis: 'Fever' },
+  });

@@ -27,7 +27,9 @@ export default function Dashboard({ user, tenant, onLogout }: DashboardProps) {
       case 'users':
         return <UserManagement tenantId={user.tenantId} userRole={user.role} />;
       case 'prescriptions':
-        return <PrescriptionManagement tenantId={user.tenantId} userId={user.id} userName={user.name} userRole={user.role} />;
+        return (
+          <PrescriptionManagement tenantId={user.tenantId} userId={user.id} userName={user.name} userRole={user.role} />
+        );
       default:
         return <DashboardHome user={user} tenant={tenant} />;
     }
@@ -35,16 +37,10 @@ export default function Dashboard({ user, tenant, onLogout }: DashboardProps) {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar
-        userRole={user.role}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
+      <Sidebar userRole={user.role} currentPage={currentPage} onPageChange={setCurrentPage} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header user={user} tenant={tenant} onLogout={onLogout} />
-        <main className="flex-1 overflow-y-auto p-6">
-          {renderPage()}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{renderPage()}</main>
       </div>
     </div>
   );

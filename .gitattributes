@@ -1,0 +1,2 @@
+# LF line endings everywhere, also on Windows checkouts with core.autocrlf, so Prettier's check agrees with CI.
+* text=auto eol=lf

@@ -3,7 +3,12 @@ import { signToken } from '../src/lib/jwt';
 import { prisma } from '../src/lib/prisma';
 import { api, as, hospital, PASSWORD } from './helpers';
 
-const register = { hospitalName: 'Sunrise Clinic', adminEmail: 'Owner@Sunrise.test', adminName: 'Dr. Owner', password: 'long-enough-1' };
+const register = {
+  hospitalName: 'Sunrise Clinic',
+  adminEmail: 'Owner@Sunrise.test',
+  adminName: 'Dr. Owner',
+  password: 'long-enough-1',
+};
 
 describe('auth', () => {
   it('registers a hospital with its first admin and returns a working token', async () => {
@@ -20,17 +25,26 @@ describe('auth', () => {
 
   it('refuses a taken email (any case) without leaving an empty hospital behind', async () => {
     await api().post('/api/auth/register').send(register);
-    const again = await api().post('/api/auth/register').send({ ...register, adminEmail: 'OWNER@sunrise.test', hospitalName: 'Copy' });
+    const again = await api()
+      .post('/api/auth/register')
+      .send({ ...register, adminEmail: 'OWNER@sunrise.test', hospitalName: 'Copy' });
     expect(again.status).toBe(409);
     expect(again.body).toEqual({ error: 'Email already registered', code: 'EMAIL_TAKEN' });
     expect(await prisma.tenant.count()).toBe(1);
   });
 
   it('validates registration and reports each field', async () => {
-    const res = await api().post('/api/auth/register').send({ hospitalName: 'X', adminEmail: 'nope', adminName: '', password: 'short' });
+    const res = await api()
+      .post('/api/auth/register')
+      .send({ hospitalName: 'X', adminEmail: 'nope', adminName: '', password: 'short' });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe('VALIDATION_ERROR');
-    expect(res.body.details.map((d: { path: string }) => d.path).sort()).toEqual(['adminEmail', 'adminName', 'hospitalName', 'password']);
+    expect(res.body.details.map((d: { path: string }) => d.path).sort()).toEqual([
+      'adminEmail',
+      'adminName',
+      'hospitalName',
+      'password',
+    ]);
     expect(await prisma.tenant.count()).toBe(0);
   });
 
@@ -40,7 +54,10 @@ describe('auth', () => {
     expect(ok.status).toBe(200);
     expect(ok.body.user.id).toBe(doctor.id);
 
-    for (const body of [{ email: doctor.email, password: 'wrong' }, { email: 'ghost@city.test', password: PASSWORD }]) {
+    for (const body of [
+      { email: doctor.email, password: 'wrong' },
+      { email: 'ghost@city.test', password: PASSWORD },
+    ]) {
       const res = await api().post('/api/auth/login').send(body);
       expect(res.status).toBe(401);
       expect(res.body).toEqual({ error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' });
@@ -49,7 +66,9 @@ describe('auth', () => {
 
   it('treats query operators in the email as invalid input, not a lookup', async () => {
     await hospital('City');
-    const res = await api().post('/api/auth/login').send({ email: { $regex: '^a' }, password: PASSWORD });
+    const res = await api()
+      .post('/api/auth/login')
+      .send({ email: { $regex: '^a' }, password: PASSWORD });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe('VALIDATION_ERROR');
   });
@@ -62,7 +81,9 @@ describe('auth', () => {
     expect(garbage.body).toEqual({ error: 'Invalid token', code: 'INVALID_TOKEN' });
 
     // A token from the old MongoDB API: valid signature, but an ObjectId instead of a UUID.
-    const legacy = await api().get('/api/auth/me').set('Authorization', `Bearer ${signToken({ userId: '6745a1b2c3d4e5f601234567' })}`);
+    const legacy = await api()
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${signToken({ userId: '6745a1b2c3d4e5f601234567' })}`);
     expect(legacy.body.code).toBe('INVALID_TOKEN');
 
     const { receptionist } = await hospital('City');

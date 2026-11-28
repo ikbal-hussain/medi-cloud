@@ -5,7 +5,10 @@ describe('patients', () => {
   it('every role can add and list patients; the form values are coerced', async () => {
     const city = await hospital('City');
     for (const user of [city.admin, city.doctor, city.receptionist]) {
-      const res = await api().post('/api/patients').set(as(user.id)).send(patientInput({ name: `By ${user.role}`, age: '41' }));
+      const res = await api()
+        .post('/api/patients')
+        .set(as(user.id))
+        .send(patientInput({ name: `By ${user.role}`, age: '41' }));
       expect(res.status).toBe(201);
       expect(res.body).toMatchObject({ age: 41, status: 'Active', tenantId: city.tenant.id });
     }
