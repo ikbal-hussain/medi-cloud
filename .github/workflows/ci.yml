@@ -29,7 +29,7 @@ jobs:
       DATABASE_URL: postgresql://medi:medi@localhost:5432/medi_cloud
       TEST_DATABASE_URL: postgresql://medi:medi@localhost:5432/medi_cloud_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -62,7 +62,7 @@ jobs:
     env:
       E2E_DATABASE_URL: postgresql://medi:medi@localhost:5432/medi_cloud_e2e
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -85,7 +85,7 @@ jobs:
     env:
       JWT_SECRET: ci-only-secret-never-used-anywhere-else
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build and start database, migrations, API and web
         run: docker compose up --build --wait --wait-timeout 240
       - name: Load demo data with the tools image
