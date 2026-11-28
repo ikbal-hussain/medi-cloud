@@ -1,3 +1,4 @@
-# Prettier also skips everything in .gitignore.
+# Prettier also skips what the root .gitignore lists, but not nested .gitignore files.
 package-lock.json
+apps/api/src/generated
 apps/api/prisma/migrations

@@ -100,6 +100,7 @@ API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 | `npm test`                             | Unit and API tests (needs PostgreSQL running)                                                                                                                                               |
 | `npm run test:e2e`                     | End-to-end tests in a real browser (Playwright); starts its own API and app. First run: `npx playwright install chromium` in `apps/web` (or `PW_CHANNEL=chrome` to use an installed Chrome) |
 | `npm run lint` / `typecheck` / `build` | Checks and production builds for every workspace                                                                                                                                            |
+| `npm run format`                       | Format every file with Prettier. CI fails on unformatted files; the pre-commit hook (installed by `npm install`) formats and lints staged files for you                                     |
 
 ---
 
