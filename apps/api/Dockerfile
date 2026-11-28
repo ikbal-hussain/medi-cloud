@@ -9,7 +9,7 @@
 # The Alpine release in these two FROM lines must match: the runtime copies the Node binary across. They are
 # written out (not an ARG) so Dependabot can update them; its Docker group bumps both in one PR, and the
 # Docker job in CI runs the result.
-FROM node:22-alpine3.24 AS manifests
+FROM node:26-alpine3.24 AS manifests
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/
