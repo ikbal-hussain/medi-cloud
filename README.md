@@ -85,7 +85,7 @@ The app calls the API at `VITE_API_URL`:
 - **Development:** `http://localhost:3000/api` (when `VITE_API_URL` isn't set)
 - **Production:** `https://medi-cloud-backend.vercel.app/api` (set on Netlify): this repo's `apps/api` on Vercel, with Neon PostgreSQL
 
-API endpoints are documented in [apps/api/README.md](apps/api/README.md).
+**📖 Interactive API docs:** [medi-cloud-backend.vercel.app/api/docs](https://medi-cloud-backend.vercel.app/api/docs) (locally: http://localhost:3000/api/docs), generated from the API's own schemas. More in [apps/api/README.md](apps/api/README.md).
 
 ---
 

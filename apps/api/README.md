@@ -5,6 +5,8 @@ TypeScript, Express 5, PostgreSQL with Prisma 7, zod validation.
 
 Live at `https://medi-cloud-backend.vercel.app/api` (see [Deploying](#deploying-vercel--neon)).
 
+**📖 Interactive API docs: [medi-cloud-backend.vercel.app/api/docs](https://medi-cloud-backend.vercel.app/api/docs)** (locally: http://localhost:3000/api/docs). Every endpoint, its roles, request and response shapes, with a "try it" button. They are generated from the same zod schemas the API validates with, and the tests fail if a route is undocumented or a response doesn't match its documented shape. The raw OpenAPI 3.1 document is at `/api/openapi.json`, ready for Postman, Insomnia or client generators.
+
 ## Run it locally
 
 From the repo root (see the root README for the whole app):
@@ -32,6 +34,7 @@ All settings are environment variables, validated at startup (`src/config/env.ts
 | `AUTH_RATE_LIMIT` | `20`                                 | Login/register attempts per IP per 15 minutes; `0` turns it off                                                                                                                                                         |
 | `TRUST_PROXY`     | `1` on Vercel, else `0`              | Proxies in front of the API whose `X-Forwarded-For` gives the client IP. Set to `1` behind nginx or a load balancer; leave `0` when the API is exposed directly, or clients could fake their IP to dodge the rate limit |
 | `LOG_LEVEL`       | `info`                               | JSON logs (pino); one line per request, no headers or bodies                                                                                                                                                            |
+| `API_DOCS`        | `true`                               | Serve the interactive API docs at `/api/docs` and the OpenAPI document at `/api/openapi.json`                                                                                                                           |
 
 ## Scripts (`npm run <script> -w @medi-cloud/api`)
 
